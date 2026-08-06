@@ -123,17 +123,30 @@ def render(markdown_path, engine="xelatex"):
             i += 1
             continue
 
-        # 标题
+        # 标题。
+        # 等级映射（对齐本 skill 综述骨架：首个 H1=文章标题，其余 H2=章、H3=节、H4=小节）：
+        #   H1 → 跳过（由 \maketitle 呈现标题，避免与正文 \section 重复）
+        #   H2 → \section    H3 → \subsection    H4 → \subsubsection
         m = re.match(r"^(#{1,4})\s+(.*)$", line)
         if m:
             hashes, text = m.group(1), m.group(2)
             lvl = len(hashes)
-            cmd = {1: "section", 2: "subsection", 3: "subsubsection", 4: "paragraph"}[lvl]
-            # 综述第一个 H1 作为标题，用 \section* 且加粗大标题由 ctex 呈现
-            body.append(f"\\{cmd}{{{inline(text)}}}")
+            first_heading = body == [] or all(not x for x in body)
+            if lvl == 1:
+                # 首个 H1 是文章标题，交给 \maketitle；正文中的 H1（罕见）降级为 section
+                if first_heading:
+                    body.append("")
+                    i += 1
+                    continue
+                body.append(f"\\section{{{inline(text)}}}")
+            elif lvl == 2:
+                body.append(f"\\section{{{inline(text)}}}")
+            elif lvl == 3:
+                body.append(f"\\subsection{{{inline(text)}}}")
+            else:
+                body.append(f"\\subsubsection{{{inline(text)}}}")
             body.append("")
             i += 1
-            # 标题后若紧跟空行则跳过
             continue
 
         # 无序列表：收集连续项 → 包进 itemize
