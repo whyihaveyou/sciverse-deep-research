@@ -1,0 +1,91 @@
+{
+  "entries": [
+    {
+      "id": 1,
+      "first_author": "Gwynne",
+      "authors": "Gwynne E, Miller J",
+      "year": "2021",
+      "title": "Random walk on random planar maps: Spectral dimension, resistance and displacement",
+      "venue": "Annals of Probability",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Gwynne2021",
+        "Gwynne",
+        "mated-CRT map"
+      ],
+      "note": "unique_id=paper:10.1214/20-aop1471"
+    },
+    {
+      "id": 2,
+      "first_author": "Bianconi",
+      "authors": "Bianconi G, Dorogovtsev SN",
+      "year": "2020",
+      "title": "The spectral dimension of simplicial complexes: a renormalization group theory",
+      "venue": "Journal of Statistical Mechanics: Theory and Experiment",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Bianconi2020",
+        "Bianconi",
+        "Apollonian network"
+      ],
+      "note": "doc_id=a1a2ebcd91edc3ee06ffcab31a5c3fa39776747478f8e6215ac69970ccef1f9c（已用于 read_content 对读）"
+    },
+    {
+      "id": 3,
+      "first_author": "Shi",
+      "authors": "Shi Y",
+      "year": "1995",
+      "title": "Critical spectral dimensionalities of random walks and phase transitions on fractals",
+      "venue": "Journal of Physics A: Mathematical and General",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Shi1995",
+        "Shi"
+      ],
+      "note": "unique_id=paper:10.1088/0305-4470/28/1/026"
+    },
+    {
+      "id": 4,
+      "first_author": "Barlow",
+      "authors": "Barlow MT, Masson R",
+      "year": "2011",
+      "title": "Spectral Dimension and Random Walks on the Two Dimensional Uniform Spanning Tree",
+      "venue": "Communications in Mathematical Physics",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Barlow2011",
+        "Barlow",
+        "UST"
+      ],
+      "note": "unique_id=paper:10.1007/s00220-011-1251-8"
+    },
+    {
+      "id": 5,
+      "first_author": "Can",
+      "authors": "Can VH, Croydon DA, Kumagai T",
+      "year": "2022",
+      "title": "Spectral dimension of simple random walk on a long-range percolation cluster",
+      "venue": "Electronic Journal of Probability",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Can2022",
+        "long-range percolation"
+      ],
+      "note": "unique_id=paper:10.1214/22-ejp783"
+    },
+    {
+      "id": 6,
+      "first_author": "Okamura",
+      "authors": "Okamura K",
+      "year": "2019",
+      "title": "Some results for range of random walk on graph with spectral dimension two",
+      "venue": "arXiv (Cornell University)",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Okamura2019",
+        "Okamura"
+      ],
+      "note": "unique_id=paper:10.48550/arxiv.1903.07990"
+    }
+  ]
+}
