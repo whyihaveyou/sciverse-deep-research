@@ -127,6 +127,17 @@ API Token 和自定义 PATH 都要显式传。先用 `which npx uv` 找到绝对
 
 ---
 
+## Step 3.5 — 可选能力（不需要额外装配，随 skill 分发）
+
+以下两项在 skill 里，**装上 skill 即具备**，不需要额外配置 MCP：
+
+- **多信息源**：`skills/sciverse-deep-research/scripts/fetch_sources.py` 直接检索 arXiv / OpenAlex
+  （零依赖 HTTP），不必配 MCP。可用 `python3 .../fetch_sources.py --list` 验证。
+- **PDF 输出**：`detect_latex.py` 探测本机 LaTeX 能力，可用时 `md_to_pdf.py` 把 final.md
+  渲染成中文 PDF。先跑 `python3 .../detect_latex.py` 确认 `level=full`/`pdf_offered=true`。
+
+---
+
 ## 排错速查
 
 | 症状 | 原因 / 解法 |

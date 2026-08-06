@@ -42,6 +42,17 @@ description: 对一个学术研究话题进行深度文献调研，产出结构�
 
 在搜索之前，先把"到底要调研什么"钉死。
 
+**Step 0 交互（成稿前的两个固定询问，按序）**：
+
+1. **输出格式**——询问用户希望交付 Markdown 还是 PDF：
+   - 用 `python3 scripts/detect_latex.py --json` 探测本机 LaTeX 能力（level=full 表示中文 PDF 可渲染）。
+   - **仅当探测为 full/可用时**，才提供"PDF"这一选项；此时问"输出为 Markdown 还是 PDF？"。LaTeX 不可用时**不问 PDF 选项**，直接默认 Markdown，并如实说明（环境无 LaTeX）。
+   - 无论选哪种，`.workflow/final.md` 始终是事实源与第一交付物；选 PDF 时在编译验收通过后，追加 `python3 scripts/md_to_pdf.py .workflow/final.md` 生成同名 .pdf 作为排版视图（见"呈现阶段"）。
+2. **信息源**——询问用户希望从哪些来源检索（**可多选**）：
+   - 主源 **sciverse**（经 MCP `search_papers`/`semantic_search`，提供引文网络滚雪球 `list_paper_relations` 与全文对读 `read_content`，本 skill 的默认信息源）。
+   - 补充源 **arXiv**、**OpenAlex**（`python3 scripts/fetch_sources.py`，覆盖 sciverse 之外的预印本/聚合题录）。
+   - 落点：把所选来源记入研究简报的"信息源"字段，检索阶段按所选来源逐一执行；未选来源不检索。sciverse 不可或缺（支撑滚雪球与全文对读），用户只选 arXiv/OpenAlex 时仍以其主检索、arXiv/OpenAlex 作覆盖补充。
+
 **研究简报必须包含研究问题（RQ）**——不是一个话题，而是 2-3 个具体的、可回答的问题。这是整篇综述的灵魂，引言里承诺回答什么，结论必须逐条回答。
 
 如果用户的输入只有一个话题（如"帮我调研 CRISPR"），用 1-2 个问题帮他把话题转化成研究问题：
@@ -169,6 +180,8 @@ description: 对一个学术研究话题进行深度文献调研，产出结构�
 **交付编译阶段（必经；以运行脚本开工，不是以写作收尾）**：实测教训（2026-07 线上运行）——脚本放在"写完之后记得跑"的位置会被整体跳过，满篇 `[@键]` 的草稿被直接交付给用户。因此本阶段是**开工门**，合同如下：前置产物是 `.workflow/draft.md`（键值草稿）与已过 validate 的 `.workflow/citation_ledger.json`，缺任一项先回上游补齐；**进入本阶段的第一个动作是运行命令，不是生成文字**——先编译：`python3 scripts/citation_ledger.py compile --ledger .workflow/citation_ledger.json --report .workflow/draft.md --output .workflow/final.md`（草稿含手写数字引用或未知键会直接报错；报错就修草稿或台账后重跑，**compile 成功之前禁止向用户输出任何交付内容**）；再验收：`python3 scripts/check_report.py .workflow/final.md --citation-ledger .workflow/citation_ledger.json.delivery.json`（含题录台账的严格模式产出会被自动识别，也可显式 `--mode strict`；题录台账单独成文时加 `--ledger 台账.md`）。交付物残留未编译的 `[@` 引用键 → FAIL。它做可机械判定的检查——反平庸黑名单、引用编号连续性、**正文↔台账↔参考文献三方对齐**（编号错绑/张冠李戴检测、点名未引用扫描）、声明报数与台账逐行清点、按模式检查台账小节的有无与参考文献格式越界。**任何 FAIL 未消解不得交付、不得声称调研完成**——检查必须承重，否则等于不存在。需要首现顺序美观时用 `python3 scripts/citation_ledger.py renumber`（正文与参考文献同一趟原子改写），禁止手工重排。它不替代 7 维门禁的判断性检查，也不改写任何内容。**覆盖边界（如实声明）**：名字↔编号对位检查只覆盖点名句；无名声明句（"该结论已被多项工作验证 [12]"）的绑定正确性靠综合阶段"每节台账切片"纪律保障，机器不提供保证——不要向用户暗示所有错绑都会被机械拦截。
 
 **交付物 = `.workflow/final.md` 这个文件本身**（按用户场景重命名后交付，或以它为源转在线文档）。参考文献从始至终不在模型的输出词表里：模型不写参考文献、不从记忆转述成品正文，成品只能来自 compile 的输出文件。
+
+**PDF 排版视图（Step 0 选定 PDF 时，追加步骤）**：compile + check_report 全部通过后，运行 `python3 scripts/md_to_pdf.py .workflow/final.md`，用本机 LaTeX（xelatex）把 final.md 渲染成同名 `.pdf`。规则：① PDF 仅为排版视图，`.md` 仍是唯一事实源，两者并存交付，PDF 不回写正文；② 仅当 Step 0 的 detect_latex 探测为可用时执行，不可用则跳过并说明；③ 交付说明末尾附上 md_to_pdf 的"生成 PDF: ..."行为行，与门禁足迹并列，作为 PDF 已生成的可核验记录。
 
 **门禁足迹（可审计）**：最终交付说明末尾必须附一行门禁足迹——有代码环境时原样粘贴 check_report 的 `summary:` 行；无代码环境时写"无代码执行环境：已完成【编号对照自检】，N 处引用全部一致"。没有足迹的交付视为未过门禁，"环境不支持"不能无痕豁免。
 

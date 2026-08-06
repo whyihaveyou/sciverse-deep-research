@@ -8,6 +8,12 @@ __pycache__/
 # 用 **/ 前缀匹配任意层级（.gitignore 的 * 不跨目录，不加会漏掉 examples/*/.workflow/ 深层的产物）
 **/.workflow/*.delivery.json
 **/*.delivery.md
+# LaTeX PDF 排版视图产物（md_to_pdf.py 生成，可由 final.md 重铸；md 始终是事实源）
+**/.workflow/*.pdf
+**/.workflow/*.tex
+**/.workflow/*.log
+**/.workflow/*.aux
+**/.workflow/*.out
 
 # 系统
 .DS_Store
