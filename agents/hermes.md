@@ -1,5 +1,9 @@
 # Hermes 适配
 
+> **装配引导**：本节是 Hermes 宿主的适配细节。你若想一步步完成 skill + 两个 MCP server 的
+> 配置，请先读仓库根 **[`AGENT-BOOTSTRAP.md`](../AGENT-BOOTSTRAP.md)**——那是一段
+> Agent-Ready 的引导流程，本节只补充 Hermes 特有的路径与命令。
+
 ## Skill
 
 Hermes 兼容 agentskills.io 的 SKILL.md（约 99%，仅 frontmatter 字段位置有小差异）。

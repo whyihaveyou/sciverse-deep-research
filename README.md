@@ -18,6 +18,7 @@ sciverse-deep-research/
 ├── mcp-server/                      # sciverse-survey-gates：把四个确定性步骤暴露为 MCP 工具
 ├── agents/                          # 各 agent 适配文档（skill 路径 + MCP 配置片段）
 ├── examples/spectral-dimension-demo/# 端到端真实用例（6 篇文献的小型综述，全门禁通过）
+├── AGENT-BOOTSTRAP.md               # Agent-Ready 引导：任意 agent 读到即可一步步配好 MCP + skill
 └── install.sh                       # 检测本机 agent → symlink skill → 打印 MCP 配置片段
 ```
 
@@ -28,6 +29,15 @@ sciverse-deep-research/
 - **题录只抄不编**：卷/期/页码/DOI/期刊等级只能来自 Crossref 或官方页面（`verify_citations.py` 三通道瀑布 + 篇级完备性闸门），查不到标"未核验"。
 - **sciverse 独有能力**：`list_paper_relations` 双向引文网络滚雪球、`read_content` 全文证据切片做引述准确性对读、`list_catalog` 学过滤字段（OA 状态、年份、学科）。
 - **机械验收承重**：`check_report.py` 做编号连续性、三方对齐、正文裸 URL/DOI、声明报数清点等可机械判定的检查，任何 FAIL 未消解不得交付；交付说明末尾必须附 `summary:` 门禁足迹。
+
+## 快速开始（Agent 请先读这段）
+
+对**人或 Agent** 都一样，装配本模块的第一步是配置两个 MCP server + 安装 skill。
+**这是一段 Agent-Ready 的引导**——把"配置 MCP"这件事写成了一段可自主执行的流程，
+任何 Agent 读到就能一步步配好，不必手动贴代码：
+
+👉 读 **[AGENT-BOOTSTRAP.md](AGENT-BOOTSTRAP.md)**
+（若宿主是 Hermes，其适配细节另见 [agents/hermes.md](agents/hermes.md)；其他 agent 见 `agents/` 目录。）
 
 ## 安装
 
