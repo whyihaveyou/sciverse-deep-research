@@ -5,8 +5,9 @@ __pycache__/
 .venv/
 
 # 本地运行时工件（compile 生成，可由脚本重铸）
-.workflow/*.delivery.json
-.workflow/*.delivery.md
+# 用 **/ 前缀匹配任意层级（.gitignore 的 * 不跨目录，不加会漏掉 examples/*/.workflow/ 深层的产物）
+**/.workflow/*.delivery.json
+**/*.delivery.md
 
 # 系统
 .DS_Store
