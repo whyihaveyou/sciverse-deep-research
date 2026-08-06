@@ -20,7 +20,8 @@ declare -a AGENTS=(
   "kimi-code|$HOME/.kimi-code/skills"
   "opencode|$HOME/.config/opencode/skills"
   "qwen-code|$HOME/.agents/skills"
-  "hermes|$HOME/.hermes/skills"
+  # Hermes 的 skill 必须放在分类子目录下（research/*）才会被扫描识别——放顶层识别不到
+  "hermes|$HOME/.hermes/skills/research"
   "openclaw|$HOME/.openclaw/skills"
 )
 

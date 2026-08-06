@@ -2,11 +2,15 @@
 
 ## Skill
 
-Hermes 兼容 agentskills.io 的 SKILL.md（约 99%，仅 frontmatter 字段位置有小差异）：
+Hermes 兼容 agentskills.io 的 SKILL.md（约 99%，仅 frontmatter 字段位置有小差异）。
+注意：Hermes 的 skill 必须放在**分类子目录**（`research/*`）下才会被扫描识别，放顶层 `~/.hermes/skills/sciverse-deep-research` 识别不到：
 
 ```bash
-ln -s ~/sciverse-deep-research/skills/sciverse-deep-research ~/.hermes/skills/sciverse-deep-research
+mkdir -p ~/.hermes/skills/research
+ln -s ~/sciverse-deep-research/skills/sciverse-deep-research ~/.hermes/skills/research/sciverse-deep-research
 ```
+
+装好后用 `hermes skills list | grep sciverse` 确认出现在 `research` 分类且为 `enabled`。
 
 ## MCP
 
