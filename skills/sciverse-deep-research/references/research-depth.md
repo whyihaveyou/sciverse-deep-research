@@ -57,3 +57,33 @@
 ### 8. 分层模型/预算分工（借 open_deep_research summarization=小模型 + report=强模型）
 证据抽取/检索摘要用 fast 便宜模型批量做；综合/裁决/报告用强模型。
 把"深"留给强模型、"全"交给廉价批量抽取，不增加成本上限。
+
+## 治"调研不充分"的深度融合（DeerFlow + 通义 DeepResearch，均已实测核实）
+
+来源：`bytedance/deer-flow`（79.4k★，2.0=Agent Skills harness；1.x=LangGraph 多智能体 Deep Research 框架，
+架构 Coordinator→Planner→Researcher/Coder→Reporter）、`Alibaba-NLP/DeepResearch`（通义，19.8k★，
+arXiv:2510.24701，30B-A3B long-horizon agentic LLM）。以下六条与本 skill 门禁/台账/编译体系直接对接。
+
+### 9. Planner 显式"够了没？"闸门（借 DeerFlow 1.x Planner）
+Planner 在检索中显式判定"是否已有足够上下文 / 是否需再补检索 / 何时转出报告"——把它接成本 skill 的
+**Coverage 门禁→补搜的显式触发点**：每次检索轮后，Planner 判"每子方向≥3篇？缺哪块？是否转综合？"
+不满足则以命名理由（`missing_evidence`）回调补搜，而非静默进入综合。这就是 orchestration.md 的 O3 落实。
+
+### 10. 长程上下文摘要+落盘（借 DeerFlow 2.0 compact / 通义 ReSum）
+子任务完成后先做摘要、落盘、从主上下文清理，保持上下文精简——对长调研防止前几视角耗尽注意力。
+对应我们的 `.workflow/subproblems/Si.md` 子问题产物 + `evidence_merge.md`（orchestration.md O2）。
+
+### 11. test-time scaling 档位（借通义 ReAct ↔ Heavy 双范式）
+把"浅打一版(ReAct)" vs "深挖迭代(Heavy/test-time scaling)"做成显式档位——对应我们的
+综述模式(快) vs 题录严格模式(重) + 编排模式(深挖)。用户要更充分时抬到 Heavy 档。
+
+### 12. 动态大纲证据结构化（借通义 WebWeaver / 对齐我们 MECE taxonomy）
+开放式深调先立动态 outline、按节点挂 web-scale 证据——与我们的"先定 MECE 分类框架 → 每节综合"同构；
+强化为机器可校验：每个大纲节点≥1个台账键（已含于点名的【大纲节点↔引用键映射表】）。
+
+### 13. 并行子智能体（借通义 ParallelMuse / run_multi_react）
+并行检索/并行 draft、主智能体汇合——融入我们编排模式的多视角并行深挖（orchestration.md O1）。
+
+### 14. 多源+学术源+引用对读一体（借通义 tool_scholar+search+visit；对应我们 sciverse+arXiv/OpenAlex+Crossref）
+学术源(sciverse)做主源，arXiv/OpenAlex 补覆盖，Crossref 做题录核验；多源都搜、合并时按引用-证据对读。
+这已由 fetch_sources.py + verify_citations.py 支撑，融合点是检索阶段默认三个源各搜一轮。

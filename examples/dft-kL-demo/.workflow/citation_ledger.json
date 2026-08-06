@@ -182,6 +182,20 @@
     "BoltzTraP"
    ],
    "note": ""
+  },
+  {
+   "id": 14,
+   "first_author": "Niranjan",
+   "authors": "Niranjan MK, Kumar V, Karthikeyan R",
+   "year": "2014",
+   "title": "Gruneisen parameter and thermal expansion coefficients of NiSi2 from first-principles",
+   "venue": "Journal of Physics D: Applied Physics",
+   "verify_status": "VERIFIED",
+   "aliases": [
+    "Niranjan2014",
+    "first-principles Gruneisen"
+   ],
+   "note": "unique_id=paper:10.1088/0022-3727/47/28/285101"
   }
  ]
 }
