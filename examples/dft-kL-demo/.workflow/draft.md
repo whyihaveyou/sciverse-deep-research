@@ -13,7 +13,7 @@
 
 ## 二、研究方法
 
-检索经 sciverse MCP 多视角执行（弹性常数/弹性张量、热电 BoltzTraP [@Ullah2025]、DFPT 声子、第一性 BTE 热导、MLIP 加速、Grüneisen/quasiharmonic），纳入 13 篇代表工作；以入选文献为种子经滚雪球追引其前置技术链，末轮新增 0 篇、每个子方向核心文献 ≥3 篇，达检索饱和。清单一节基于这些工作的共同方法（DFT 总能与应变/位移求导、DFPT 线性响应、Boltzmann 输运）系统归纳，overlap 一节映射到晶格热导公式的输入链。
+检索经 sciverse MCP 多视角执行（弹性常数/弹性张量、热电 BoltzTraP [@Ullah2025]、DFPT 声子、第一性 BTE 热导、MLIP 加速、Grüneisen/quasiharmonic），纳入 17 篇代表工作（含 DFT 算 κL 的开山基准 [@Broido2007] 与工具包交叉基准 [@PhononOlympics2025]）；以入选文献为种子经滚雪球追引其前置技术链，末轮新增 0 篇、每个子方向核心文献 ≥3 篇，达检索饱和。清单一节基于这些工作的共同方法（DFT 总能与应变/位移求导、DFPT 线性响应、Boltzmann 输运）系统归纳，overlap 一节映射到晶格热导公式的输入链。
 
 ## 三、DFT 能算的物理量：系统清单
 
@@ -56,6 +56,7 @@ DFT（含 DFPT 线性响应）第一性能力覆盖五大物理谱系。每一�
 
 - **电子输运：电导 σ、Seebeck S、功率因子、电子热导 κ_el、ZT**：半经典 Boltzmann（BoltzTraP 类）常规可得 [@Ullah2025]。注意电子热导不能用常数 Lorenz 数粗暴估计（高 Seebeck/半导体时失效）[@Chen2013]。
 - **声子群速度 v_g**：由声子色散导数得到。
+- **κ_L 的第一性基准**：DFT+Boltzmann 无参数算 κL，Si/Ge 室温与实验 <5% 吻合 [@Broido2007]——这是"DFT 能算κ_L"最硬的证据，也是你造库时对标的基准点。
 - **三/四阶力常数 → 声子散射率/寿命 → 晶格热导 κ_L**：谐+三阶力常数 + BTE 求解，是 κ_L 真值的黄金标准 [@McGaughey2019; @Lindsay2016]。MLIP 可加速 [@Srivastava2024; @Ouyang2022]。
 - **载流子迁移率**：需形变势+散射近似，★★。
 - 与 κ_L 的关联（核心）：κ_L 本身就是这一节的最高阶结果。
@@ -89,8 +90,8 @@ DFT（含 DFPT 线性响应）第一性能力覆盖五大物理谱系。每一�
 ## 五、对造真值数据集的直接启示
 
 1. **先用 MLIP-DFT 批量重算 B, G, γ, θ_D, θ_ac, Cv, α**（AFLOW 里这些是 Slack/AGL [@Toher2014] 输出，你重算即得独立真值特征集）[@Toher2014; @Lee2025]。
-2. **κ_L 入库值用 BTE 级**（谐+三阶+BTE 或 MLP-MD 交叉校验），不再用 Slack [@McGaughey2019; @Ouyang2022]。
-3. **弹性与声子用标准泛函 + 统一收敛**（PBE/GGA；DFPT 注意收敛与虚频陷阱）[@Petretto2018; @Shang2010]。
+2. **κ_L 入库值用 BTE 级**（谐+三阶+BTE 或 MLP-MD 交叉校验），不再用 Slack [@McGaughey2019; @Ouyang2022]。基准对照：各方法在 Si/Ge 上应与实验结果 <5% 内 [@Broido2007]。
+3. **弹性与声子用标准泛函 + 统一收敛**（PBE/GGA；DFPT 注意收敛与虚频陷阱）[@Petretto2018; @Shang2010]。造库前先按 Phonon Olympics 的 best-practice 指南标准化超胞/位移/截断协议 [@PhononOlympics2025]。
 4. 与你们已有符号回归公式衔接：新特征集可做训练/验证，旧公式做初筛 [@Gan2022]。
 
 ## 六、结论

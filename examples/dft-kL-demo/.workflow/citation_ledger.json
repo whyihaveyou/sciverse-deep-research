@@ -196,6 +196,50 @@
     "first-principles Gruneisen"
    ],
    "note": "unique_id=paper:10.1088/0022-3727/47/28/285101"
+  },
+  {
+   "id": 15,
+   "first_author": "Broido",
+   "authors": "Broido DA, Malorny M, Birner G, Mingo N, Stewart DA",
+   "year": "2007",
+   "title": "Intrinsic lattice thermal conductivity of semiconductors from first principles",
+   "venue": "Applied Physics Letters",
+   "verify_status": "VERIFIED",
+   "aliases": [
+    "Broido2007",
+    "intrinsic kL",
+    "Si Ge first principles"
+   ],
+   "note": "unique_id=paper:10.1063/1.2822891（956 被引；DFT+Boltzmann 无参数，Si/Ge 室温与实验<5%吻合——DFT算kL的开山基准）"
+  },
+  {
+   "id": 16,
+   "first_author": "McGaugheyA",
+   "authors": "McGaughey AJH, Lindsay L, Bao H, et al.",
+   "year": "2025",
+   "title": "Phonon Olympics: Phonon property and lattice thermal conductivity benchmarking from open-source packages",
+   "venue": "Journal of Applied Physics",
+   "verify_status": "VERIFIED",
+   "aliases": [
+    "PhononOlympics2025",
+    "Phonon Olympics",
+    "ALAMODE Phono3py ShengBTE benchmark"
+   ],
+   "note": "unique_id=paper:10.1063/5.0289819（ALAMODE/Phono3py/ShengBTE 三方交叉基准，kL 差异±15%源自三声子散射率；造热导库的方法基准指南）"
+  },
+  {
+   "id": 17,
+   "first_author": "Weerasekera",
+   "authors": "Weerasekera N, Cao S, Perera L",
+   "year": "2022",
+   "title": "Functional Property Evaluation of Crystalline Materials using Density Functional Theory: A Review",
+   "venue": "European Journal of Applied Physics",
+   "verify_status": "VERIFIED",
+   "aliases": [
+    "Weerasekera2022",
+    "DFT properties review"
+   ],
+   "note": "unique_id=paper:10.24018/ejphysics.2022.4.1.142（DFT 算力学/电/热物性综述）"
   }
  ]
 }

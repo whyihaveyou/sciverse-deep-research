@@ -127,24 +127,28 @@ def render(markdown_path, engine="xelatex"):
         # 等级映射（对齐本 skill 综述骨架：首个 H1=文章标题，其余 H2=章、H3=节、H4=小节）：
         #   H1 → 跳过（由 \maketitle 呈现标题，避免与正文 \section 重复）
         #   H2 → \section    H3 → \subsection    H4 → \subsubsection
+        # 关键：本 skill 综述的标题已含手写序号（"一、引言""3.1 结构性质"），
+        # 若再用带自动编号的 \section 会形成"LaTeX 数字 + 手写序号"双重编号、
+        # 视觉混乱。故一律用带 * 的星号版（\section* 等，不自动编号），
+        # 保留正文原有的中文/节号手写序号。
         m = re.match(r"^(#{1,4})\s+(.*)$", line)
         if m:
             hashes, text = m.group(1), m.group(2)
             lvl = len(hashes)
             first_heading = body == [] or all(not x for x in body)
             if lvl == 1:
-                # 首个 H1 是文章标题，交给 \maketitle；正文中的 H1（罕见）降级为 section
+                # 首个 H1 是文章标题，交给 \maketitle；正文中的 H1（罕见）降级为 section*
                 if first_heading:
                     body.append("")
                     i += 1
                     continue
-                body.append(f"\\section{{{inline(text)}}}")
+                body.append(f"\\section*{{{inline(text)}}}")
             elif lvl == 2:
-                body.append(f"\\section{{{inline(text)}}}")
+                body.append(f"\\section*{{{inline(text)}}}")
             elif lvl == 3:
-                body.append(f"\\subsection{{{inline(text)}}}")
+                body.append(f"\\subsection*{{{inline(text)}}}")
             else:
-                body.append(f"\\subsubsection{{{inline(text)}}}")
+                body.append(f"\\subsubsection*{{{inline(text)}}}")
             body.append("")
             i += 1
             continue
