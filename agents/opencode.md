@@ -5,7 +5,7 @@
 OpenCode 完整实现 SKILL.md spec：
 
 ```bash
-ln -s ~/sciverse-deep-research/skills/sciverse-deep-research ~/.config/opencode/skills/sciverse-deep-research
+ln -s /Users/qzp/科研项目/sciverse-deep-research/skills/sciverse-deep-research ~/.config/opencode/skills/sciverse-deep-research
 ```
 
 ## MCP

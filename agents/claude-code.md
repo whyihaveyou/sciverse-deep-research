@@ -3,7 +3,7 @@
 ## Skill
 
 ```bash
-ln -s ~/sciverse-deep-research/skills/sciverse-deep-research ~/.claude/skills/sciverse-deep-research
+ln -s /Users/qzp/科研项目/sciverse-deep-research/skills/sciverse-deep-research ~/.claude/skills/sciverse-deep-research
 ```
 
 （或运行仓库根目录的 `install.sh`，会自动检测并链接。）
@@ -18,7 +18,7 @@ claude mcp add -s user sciverse \
   -- npx -y sciverse-mcp-server
 
 claude mcp add -s user sciverse-survey-gates \
-  -- ~/.local/bin/uv run --project ~/sciverse-deep-research/mcp-server sciverse-survey-gates
+  -- ~/.local/bin/uv run --project /Users/qzp/科研项目/sciverse-deep-research/mcp-server sciverse-survey-gates
 ```
 
 方式二（手写 `~/.claude.json` 的 `mcpServers` 节）：
@@ -33,7 +33,7 @@ claude mcp add -s user sciverse-survey-gates \
     },
     "sciverse-survey-gates": {
       "command": "~/.local/bin/uv",
-      "args": ["run", "--project", "~/sciverse-deep-research/mcp-server", "sciverse-survey-gates"]
+      "args": ["run", "--project", "/Users/qzp/科研项目/sciverse-deep-research/mcp-server", "sciverse-survey-gates"]
     }
   }
 }

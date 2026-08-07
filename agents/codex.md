@@ -5,7 +5,7 @@
 Codex 原生支持 SKILL.md（`~/.codex/skills/`，`$skill` 调用）：
 
 ```bash
-ln -s ~/sciverse-deep-research/skills/sciverse-deep-research ~/.codex/skills/sciverse-deep-research
+ln -s /Users/qzp/科研项目/sciverse-deep-research/skills/sciverse-deep-research ~/.codex/skills/sciverse-deep-research
 ```
 
 ## MCP

@@ -36,10 +36,10 @@
 
 ## Step 1 — 安装 skill（一份，多 agent 符号链接）
 
-skill 本体在 `~/sciverse-deep-research/skills/sciverse-deep-research`。直接跑安装脚本：
+skill 本体在 `/Users/qzp/科研项目/sciverse-deep-research/skills/sciverse-deep-research`。直接跑安装脚本：
 
 ```bash
-~/sciverse-deep-research/install.sh
+/Users/qzp/科研项目/sciverse-deep-research/install.sh
 ```
 
 它会自动检测本机已装 agent 并符号链接 skill。**注意**：Hermes 的 skill 必须放在

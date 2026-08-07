@@ -3,7 +3,7 @@
 ## Skill
 
 ```bash
-ln -s ~/sciverse-deep-research/skills/sciverse-deep-research ~/.openclaw/skills/sciverse-deep-research
+ln -s /Users/qzp/科研项目/sciverse-deep-research/skills/sciverse-deep-research ~/.openclaw/skills/sciverse-deep-research
 ```
 
 （OpenClaw 支持 skills 目录加载；也可考虑打包上传 ClawHub，见官方文档。）
@@ -13,7 +13,7 @@ ln -s ~/sciverse-deep-research/skills/sciverse-deep-research ~/.openclaw/skills/
 OpenClaw 的 MCP 配置格式请以其当前版本文档为准。需要的两个 server 与所有 agent 相同：
 
 - `sciverse`：`npx -y sciverse-mcp-server`，env `SCIVERSE_API_TOKEN`
-- `sciverse-survey-gates`：`uv run --project ~/sciverse-deep-research/mcp-server sciverse-survey-gates`
+- `sciverse-survey-gates`：`uv run --project /Users/qzp/科研项目/sciverse-deep-research/mcp-server sciverse-survey-gates`
 
 ## 备注
 

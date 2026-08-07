@@ -48,7 +48,7 @@ sciverse-deep-research/
 ## 安装
 
 ```bash
-~/sciverse-deep-research/install.sh
+/Users/qzp/科研项目/sciverse-deep-research/install.sh
 ```
 
 自动检测本机已装的 agent（Claude Code / Codex / Kimi Code / OpenCode / Qwen Code / Hermes / OpenClaw），symlink skill 并打印两个 MCP server 的配置片段（不改动任何配置文件）。各 agent 的具体配置见 `agents/*.md`。

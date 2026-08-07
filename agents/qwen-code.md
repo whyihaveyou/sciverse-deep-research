@@ -3,7 +3,7 @@
 ## Skill
 
 ```bash
-ln -s ~/sciverse-deep-research/skills/sciverse-deep-research ~/.agents/skills/sciverse-deep-research
+ln -s /Users/qzp/科研项目/sciverse-deep-research/skills/sciverse-deep-research ~/.agents/skills/sciverse-deep-research
 ```
 
 （Qwen Code 读取 `~/.agents/skills`；如你的版本用 `~/.qwen/skills`，链接到对应目录即可。）
