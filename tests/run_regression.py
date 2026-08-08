@@ -1,0 +1,180 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+run_regression.py — sciverse-deep-research 一键回归门禁（stdlib 零依赖）
+
+用法：
+    python3 tests/run_regression.py            # 快速回归
+    python3 tests/run_regression.py --slow     # 含慢速项（md_to_pdf 真实 LaTeX 编译）
+
+设计：
+    - 零依赖：直接 `python3` 可跑（与 scripts/ 的零依赖哲学一致）。
+    - 每个用例 = 一个真实可复现命令 + 对输出/退出码的断言。
+    - 新增脚本或新门禁时，用 @check 登记一个用例即可；审查员补用例也加在这里。
+
+退出码：0 = 全绿；1 = 有 FAIL。
+"""
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SCRIPTS = os.path.join(ROOT, "skills", "sciverse-deep-research", "scripts")
+
+CHECKS = []       # (name, fn)，定义顺序即执行顺序
+SLOW_CHECKS = []  # 仅 --slow 时执行
+
+
+def run_script(script, *args):
+    """跑 scripts/ 下的脚本，返回 (exit_code, 合并输出)。"""
+    p = subprocess.run(
+        [sys.executable, os.path.join(SCRIPTS, script)] + list(args),
+        cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    return p.returncode, p.stdout
+
+
+def last_line(out):
+    lines = out.strip().splitlines()
+    return lines[-1] if lines else ""
+
+
+def check(name, slow=False):
+    """装饰器：登记一个回归用例。用例函数返回 (ok: bool, detail: str)。"""
+    def deco(fn):
+        (SLOW_CHECKS if slow else CHECKS).append((name, fn))
+        return fn
+    return deco
+
+
+# ---------- 快速用例 ----------
+
+@check("citation_ledger --selftest")
+def _selftest_ledger():
+    code, out = run_script("citation_ledger.py", "--selftest")
+    return code == 0, last_line(out)
+
+
+@check("check_report --selftest")
+def _selftest_check():
+    code, out = run_script("check_report.py", "--selftest")
+    return code == 0, last_line(out)
+
+
+@check("verify_citations --selftest")
+def _selftest_verify():
+    code, out = run_script("verify_citations.py", "--selftest")
+    return code == 0, last_line(out)
+
+
+@check("spectral-demo 台账 validate = FAIL 0")
+def _ledger_validate():
+    code, out = run_script(
+        "citation_ledger.py", "validate",
+        "--ledger", "examples/spectral-dimension-demo/.workflow/citation_ledger.json")
+    return code == 0 and "FAIL 0" in out, out.strip()
+
+
+@check("dft-kL-demo 交付门禁 = FAIL 0 / WARN 0")
+def _delivery_gate():
+    code, out = run_script(
+        "check_report.py", "examples/dft-kL-demo/.workflow/final.md",
+        "--citation-ledger",
+        "examples/dft-kL-demo/.workflow/citation_ledger.json.delivery.json")
+    ok = code == 0 and "FAIL 0" in out and "WARN 0" in out
+    return ok, last_line(out)
+
+
+@check("detect_latex 探测可执行")
+def _detect_latex():
+    # 不断言 level=full（没装 LaTeX 的机器也应跑通），只要求正常退出且给出 level
+    code, out = run_script("detect_latex.py")
+    return code == 0 and "level=" in out, last_line(out)
+
+
+# fetch_sources.py 是网络脚本（arXiv/OpenAlex），回归只做离线 CLI 契约断言，
+# 不触发真实 HTTP，保证任何环境（含无网/离线 CI）下确定性可复现。
+@check("fetch_sources --list 离线可用")
+def _fetch_list():
+    code, out = run_script("fetch_sources.py", "--list")
+    # 退出 0，且把 arxiv/openalex 都列出来（so known sources contract held）
+    return code == 0 and "arxiv" in out and "openalex" in out, last_line(out)
+
+
+@check("fetch_sources 未知来源 = exit 2（不静默降级）")
+def _fetch_unknown_source():
+    code, out = run_script("fetch_sources.py", "notasource", "q")
+    # 未识别来源必须报错退出 2，绝不能去网络、更不能当空结果返回 0
+    return code == 2 and "未知来源" in out, f"exit={code} {last_line(out)}"
+
+
+@check("fetch_sources 缺 query = exit 2")
+def _fetch_missing_query():
+    code, out = run_script("fetch_sources.py", "arxiv")
+    # 缺检索词是用户输入错误（exit 2），不是网络故障（exit 1）
+    return code == 2 and "缺少 query" in out, f"exit={code} {last_line(out)}"
+
+
+@check("demo 台账 compile 幂等（draft -> final 可重铸）")
+def _compile_idempotent():
+    with tempfile.TemporaryDirectory() as td:
+        out_md = os.path.join(td, "final.md")
+        code, out = run_script(
+            "citation_ledger.py", "compile",
+            "--ledger", "examples/dft-kL-demo/.workflow/citation_ledger.json",
+            "--report", "examples/dft-kL-demo/.workflow/draft.md",
+            "--output", out_md)
+        if code != 0:
+            return False, last_line(out)
+        with open(out_md) as f:
+            compiled = f.read()
+        # 编译产物不应残留 [@键]，且应含数字编号引用
+        leftover_keys = re.search(r"\[@[^\]]+\]", compiled) is not None
+        has_numcite = re.search(r"\[\d+\]", compiled) is not None
+        return (not leftover_keys) and has_numcite, \
+            f"残留键={leftover_keys} 数字引用={has_numcite}"
+
+
+# ---------- 慢速用例（--slow 才跑） ----------
+
+@check("md_to_pdf 真实编译 spectral-demo final.md", slow=True)
+def _md_to_pdf_real():
+    with tempfile.TemporaryDirectory() as td:
+        dst = os.path.join(td, "final.md")
+        shutil.copy("examples/spectral-dimension-demo/.workflow/final.md", dst)
+        code, out = run_script("md_to_pdf.py", dst)
+        pdf = dst[:-len(".md")] + ".pdf"
+        ok = code == 0 and os.path.exists(pdf) and os.path.getsize(pdf) > 10_000
+        return ok, last_line(out)
+
+
+# ---------- 入口 ----------
+
+def main():
+    checks = list(CHECKS)
+    if "--slow" in sys.argv:
+        checks += SLOW_CHECKS
+
+    results = []
+    for name, fn in checks:
+        try:
+            ok, detail = fn()
+        except Exception as e:  # 用例自身异常也算 FAIL，不让回归静默跳过
+            ok, detail = False, f"用例异常: {e!r}"
+        results.append((name, ok, detail))
+
+    n_fail = 0
+    for name, ok, detail in results:
+        if not ok:
+            n_fail += 1
+            print(f"[FAIL] {name}  | {str(detail)[:160]}")
+        else:
+            print(f"[PASS] {name}")
+    print(f"summary: PASS {len(results) - n_fail} / FAIL {n_fail}")
+    return 1 if n_fail else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,231 @@
+{
+  "entries": [
+    {
+      "id": 1,
+      "first_author": "Ullah",
+      "authors": "Ullah Z, Khan R, Khan MA, Al Otaibi S, Althubeiti K, Abdullaev S",
+      "year": "2025",
+      "title": "High-temperature thermoelectric performance of spinel MgGa2O4 through a first-principles and Boltzmann transport study",
+      "venue": "Computational Materials Science",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Ullah2025",
+        "BoltzTraP"
+      ],
+      "note": ""
+    },
+    {
+      "id": 2,
+      "first_author": "Broido",
+      "authors": "Broido DA, Malorny M, Birner G, Mingo N, Stewart DA",
+      "year": "2007",
+      "title": "Intrinsic lattice thermal conductivity of semiconductors from first principles",
+      "venue": "Applied Physics Letters",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Broido2007",
+        "intrinsic kL",
+        "Si Ge first principles"
+      ],
+      "note": "unique_id=paper:10.1063/1.2822891（956 被引；DFT+Boltzmann 无参数，Si/Ge 室温与实验<5%吻合——DFT算kL的开山基准）"
+    },
+    {
+      "id": 3,
+      "first_author": "McGaugheyA",
+      "authors": "McGaughey AJH, Lindsay L, Bao H, et al.",
+      "year": "2025",
+      "title": "Phonon Olympics: Phonon property and lattice thermal conductivity benchmarking from open-source packages",
+      "venue": "Journal of Applied Physics",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "PhononOlympics2025",
+        "Phonon Olympics",
+        "ALAMODE Phono3py ShengBTE benchmark"
+      ],
+      "note": "unique_id=paper:10.1063/5.0289819（ALAMODE/Phono3py/ShengBTE 三方交叉基准，kL 差异±15%源自三声子散射率；造热导库的方法基准指南）"
+    },
+    {
+      "id": 4,
+      "first_author": "Shang",
+      "authors": "Shang S-L, Saengdeejing A, Mei Z-G, Kim DE, Zhang H, Ganeshan S, Wang Y, Liu Z-K",
+      "year": "2010",
+      "title": "First-principles calculations of pure elements: Equations of state and elastic stiffness constants",
+      "venue": "Computational Materials Science",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Shang2010",
+        "elastic stiffness"
+      ],
+      "note": ""
+    },
+    {
+      "id": 5,
+      "first_author": "Petretto",
+      "authors": "Petretto G, Gonze X, Hautier G, Rignanese G-M",
+      "year": "2018",
+      "title": "Convergence and pitfalls of density functional perturbation theory phonons calculations from a high-throughput perspective",
+      "venue": "Computational Materials Science",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Petretto2018",
+        "DFPT high-throughput"
+      ],
+      "note": ""
+    },
+    {
+      "id": 6,
+      "first_author": "Zhao",
+      "authors": "Zhao J, Winey JM, Gupta YM",
+      "year": "2007",
+      "title": "First-principles calculations of second- and third-order elastic constants for single crystals of arbitrary symmetry",
+      "venue": "Physical Review B",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Zhao2007",
+        "third-order elastic"
+      ],
+      "note": ""
+    },
+    {
+      "id": 7,
+      "first_author": "Toher",
+      "authors": "Toher C, Plata JJ, Levy O, de Jong M, Asta M, Nardelli MB, Curtarolo S",
+      "year": "2014",
+      "title": "High-throughput computational screening of thermal conductivity, Debye temperature, and Grüneisen parameter using a quasiharmonic Debye model",
+      "venue": "Physical Review B",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Toher2014",
+        "AGL",
+        "quasiharmonic Debye"
+      ],
+      "note": ""
+    },
+    {
+      "id": 8,
+      "first_author": "Gan",
+      "authors": "Gan CK, Koh EK",
+      "year": "2022",
+      "title": "A size-consistent Grüneisen-quasiharmonic approach for lattice thermal conductivity",
+      "venue": "Europhysics Letters",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Gan2022",
+        "GQA"
+      ],
+      "note": ""
+    },
+    {
+      "id": 9,
+      "first_author": "Niranjan",
+      "authors": "Niranjan MK, Kumar V, Karthikeyan R",
+      "year": "2014",
+      "title": "Gruneisen parameter and thermal expansion coefficients of NiSi2 from first-principles",
+      "venue": "Journal of Physics D: Applied Physics",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Niranjan2014",
+        "first-principles Gruneisen"
+      ],
+      "note": "unique_id=paper:10.1088/0022-3727/47/28/285101"
+    },
+    {
+      "id": 10,
+      "first_author": "Chen",
+      "authors": "Chen M, Podloucky R",
+      "year": "2013",
+      "title": "Electronic thermal conductivity as derived by density functional theory",
+      "venue": "Physical Review B",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Chen2013",
+        "electronic kappa"
+      ],
+      "note": ""
+    },
+    {
+      "id": 11,
+      "first_author": "McGaughey",
+      "authors": "McGaughey AJH, Jain A, Kim H-Y, Fu B",
+      "year": "2019",
+      "title": "Phonon properties and thermal conductivity from first principles, lattice dynamics, and the Boltzmann transport equation",
+      "venue": "Journal of Applied Physics",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "McGaughey2019",
+        "BTE-framework"
+      ],
+      "note": ""
+    },
+    {
+      "id": 12,
+      "first_author": "Lindsay",
+      "authors": "Lindsay L",
+      "year": "2016",
+      "title": "First Principles Peierls-Boltzmann Phonon Thermal Transport: A Topical Review",
+      "venue": "Nanoscale and Microscale Thermophysical Engineering",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Lindsay2016",
+        "PeierlsBTE"
+      ],
+      "note": ""
+    },
+    {
+      "id": 13,
+      "first_author": "Srivastava",
+      "authors": "Srivastava Y, Jain A",
+      "year": "2024",
+      "title": "Accelerating Phonon Thermal Conductivity Prediction by an Order of Magnitude Through Machine Learning-Assisted Extraction of Anharmonic Force Constants",
+      "venue": "arXiv",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Srivastava2024",
+        "ML anharmonic"
+      ],
+      "note": ""
+    },
+    {
+      "id": 14,
+      "first_author": "Ouyang",
+      "authors": "Ouyang Y, Yu C, He J, Jiang P, Ren W, Chen J",
+      "year": "2022",
+      "title": "Accurate description of high-order phonon anharmonicity and lattice thermal conductivity from molecular dynamics simulations with machine learning potential",
+      "venue": "Physical Review B",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Ouyang2022",
+        "MLP-MD"
+      ],
+      "note": ""
+    },
+    {
+      "id": 15,
+      "first_author": "Jain",
+      "authors": "Jain A, Srivastava Y, Gokhale AG, Virakante N, Kagdada HL",
+      "year": "2025",
+      "title": "Higher-order thermal transport theory for phonon thermal transport in semiconductors using lattice dynamics calculations and the Boltzmann transport equation",
+      "venue": "arXiv",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Jain2025",
+        "HigherOrderBTE"
+      ],
+      "note": ""
+    },
+    {
+      "id": 16,
+      "first_author": "Lee",
+      "authors": "Lee H, Hegde VI, Wolverton C, Xia Y",
+      "year": "2025",
+      "title": "Accelerating high-throughput phonon calculations via machine learning universal potentials",
+      "venue": "Materials Today Physics",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Lee2025",
+        "MACE-MLIP"
+      ],
+      "note": ""
+    }
+  ]
+}
