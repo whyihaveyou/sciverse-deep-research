@@ -117,6 +117,41 @@ def _fetch_missing_query():
     return code == 2 and "缺少 query" in out, f"exit={code} {last_line(out)}"
 
 
+# self_eval.py（P1 自评工具链）离线契约断言：不触发真实 HTTP、不需要 API key，
+# 保住「key 永不进 git / judge 脱网也可验证语义」这条红线。
+@check("self_eval --selftest 离线 ALL PASS")
+def _selfeval_selftest():
+    code, out = run_script("self_eval.py", "--selftest")
+    return code == 0 and "ALL PASS" in out, last_line(out)
+
+
+@check("self_eval objective 客观指标（无 key 也能跑）")
+def _selfeval_objective():
+    code, out = run_script(
+        "self_eval.py", "objective", "--report",
+        "examples/dft-kL-demo/.workflow/final.md")
+    ok = code == 0 and "total_chars" not in out and "总字符" in out
+    return ok, last_line(out)
+
+
+@check("self_eval judge 无 key = exit 3（红线：不静默降级）")
+def _selfeval_judge_nokey():
+    # 用空 HOME + 空环境变量跑 judge：config 也读不到 key，
+    # 必须因缺 key 退出 3，绝不能去网络或打空分。
+    import os as _os
+    with tempfile.TemporaryDirectory() as td:
+        env = dict(_os.environ)
+        env.pop("SCIVERSE_DEEPSEEK_API_KEY", None)
+        env["HOME"] = td            # ~/.hermes/config.yaml 不存在 -> 无 key
+        p = subprocess.run(
+            [sys.executable, os.path.join(SCRIPTS, "self_eval.py"), "judge",
+             "--report", "examples/dft-kL-demo/.workflow/final.md"],
+            cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            text=True, env=env)
+    last = p.stdout.strip().splitlines()[-1] if p.stdout.strip() else ""
+    return p.returncode == 3, f"exit={p.returncode} {last}"
+
+
 @check("demo 台账 compile 幂等（draft -> final 可重铸）")
 def _compile_idempotent():
     with tempfile.TemporaryDirectory() as td:
