@@ -17,3 +17,9 @@ __pycache__/
 
 # 系统
 .DS_Store
+
+# output/ 交付目录的 LaTeX 中间产物（交付物只收 .md + .pdf）
+**/output/*.aux
+**/output/*.log
+**/output/*.out
+**/output/*.tex

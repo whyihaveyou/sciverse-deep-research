@@ -96,6 +96,12 @@ Hermes / Qwen Code / OpenCode）获得**学术深度文献调研**能力——�
 - **证明"任意 Agent 可接入"不是口号**
 - 顺手修了：Kimi skill 断链（路径迁移后）、Kimi mcp.json 补门禁 server
 
+**g) 第一性 κ_L 真值数据集·可执行技术方案（独立 doc 入仓）**
+- 落位：`examples/dft-kL-demo/output/第一性κL数据集_可执行技术方案.md`（v1 草案）
+- 承接 e) 的 overlap 结论：定义「做什么/协议/流水线 Stage0-4/数据 schema/质控门/成本/风险/里程碑」，
+  供 P0 直接落地造库。引用指向 `output/DFT能算的物理量清单_与晶格热导率Overlap.md`，无断链。
+- 注：其 LaTeX 中间产物（.aux/.log/.out）被 `.gitignore` 的 `**/output/*.{aux,log,out}` 规则挡在库外，库内只收 .md。
+
 ## 5. 你要接手的待办（按优先级）
 
 ### P0 — 回晶格导热项目，落地真值数据集方案（用户的终极目的）
