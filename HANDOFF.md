@@ -102,6 +102,12 @@ Hermes / Qwen Code / OpenCode）获得**学术深度文献调研**能力——�
   供 P0 直接落地造库。引用指向 `output/DFT能算的物理量清单_与晶格热导率Overlap.md`，无断链。
 - 注：其 LaTeX 中间产物（.aux/.log/.out）被 `.gitignore` 的 `**/output/*.{aux,log,out}` 规则挡在库外，库内只收 .md。
 
+**h) P1 自评工具链落地** — commit 638a77c（分支 feat/p1-self-eval，PR #2 已 merge → main 3bc409fe）
+- 落位：`skills/sciverse-deep-research/scripts/self_eval.py`（零依赖 stdlib）
+- 两路自评信号：judge（PJLab API + judge=deepseek-v4-flash-0731，7 维门禁逐维 1-5，默认 5 次采样取平均，输出每维 mean+range + overall）；objective（门禁 FAIL/WARN、台账来源数、每章节字数，无 key 也能跑）
+- 安全红线已验证：真实 PJLab key 全库 git grep 0 处；只从 env `SCIVERSE_DEEPSEEK_API_KEY` 或 `~/.hermes/config.yaml` 的 `providers.pujiang-deepseek.api_key` 读；judge 无 key exit 3 不静默降级
+- tests/run_regression.py 增 3 条离线用例（--selftest / objective 无key / judge 无key=exit3），回归 13/13 全绿
+
 ## 5. 你要接手的待办（按优先级）
 
 ### P0 — 回晶格导热项目，落地真值数据集方案（用户的终极目的）
@@ -114,11 +120,8 @@ Hermes / Qwen Code / OpenCode）获得**学术深度文献调研**能力——�
 - **交付形态**：技术方案文档 + 命令骨架，不是理论
 
 ### P1 — 5 轮循环 + 自评（用户原始要求）
-- 用优化后 Harness 测多轮，每轮"优化→测试→读产出→再优化"，至少 5 轮
-- **自评方法需先与用户确认**：用户建议"单独调 DeepSeek API 多次平均"，但本会话无 API 凭证。
-  - 方案 A：用户提供 DeepSeek/其他 API key，用 LLM-as-judge 多次平均
-  - 方案 B：无 key 时用客观指标（门禁 FAIL/WARN 数、来源数、每章节字数、覆盖度）
-  - **接手时先问用户选哪个**，不要擅自假设
+- ⚠️ **自评工具链已落地**（方案 A LLM-as-judge 多次平均 + 方案 B 客观指标双路，见 §4.h）。接手时**不用再写工具**，直接用 `scripts/self_eval.py`。
+- **剩：跑 M2 至少 5 轮"优化→测试→读产出→再优化"闭环**，每轮用 judge（联网，需 PJLab key）+ objective 双信号自评，记录分数随轮次收敛
 
 ### P1 — 白箱参考 deer-flow（深化融合）
 - 目的：用户想"对比 DeerFlow 和我们的调研轨迹"找出差距
