@@ -166,14 +166,179 @@ def _sub_outside_fences(text, repl_fn):
                      for i, line in enumerate(lines))
 
 
-def format_entry(e):
-    """按 skill 引用格式打印一条：[N] 作者, “标题,” 会议/期刊, 年份.
-    非 VERIFIED/MINOR 条目自动附（未核验）标注——用户要求：未核验的可以保留，
-    但必须让读者一眼看出哪些验证过、哪些没验证过。"""
+def _unverified_mark(e):
+    """非 VERIFIED/MINOR 条目返回（未核验）标注，已核验返回空串。"""
+    if str(e.get("verify_status", "")).strip().upper() in VERIFIED_STATUS:
+        return ""
+    return "（未核验）"
+
+
+def _name_parts(authors):
+    """把台账作者的 “Ullah Z, Khan R, Khan MA, et al.” 切成段列表。”
+    段形如 “姓 名[名]”，et al. 原样保留。返回段字符串列表。"""
+    raw = str(authors or "").strip().rstrip(",")
+    if not raw:
+        return []
+    segs = [s.strip() for s in re.split(r"[;,，；]", raw) if s.strip()]
+    return segs
+
+
+def _apa_names(authors):
+    """Ullah Z, Khan R -> Ullah, Z., Khan, R.（APA）；et al. 保留。"""
+    out = []
+    for s in _name_parts(authors):
+        if s.lower() == "et al." or "et al" in s.lower():
+            out.append("et al.")
+            continue
+        parts = s.split()
+        if len(parts) >= 2:
+            last = parts[0]
+            initials = " ".join(p[0] + "." for p in parts[1:] if p)
+            out.append(f"{last}, {initials}")
+        else:
+            out.append(s)
+    return out
+
+
+def _gbt_names(authors):
+    """GB/T 7714：姓 + 名全写，逗号分隔；et al. -> ,等。"""
+    out = []
+    for s in _name_parts(authors):
+        if "et al" in s.lower():
+            out.append("等")
+            continue
+        out.append(s)
+    return out
+
+
+def _ieee_names(authors):
+    """IEEE：名首字母 + 姓，逗号分隔。台账 authors 视为“姓 名”排布：
+    Ullah Z -> Z. Ullah；Khan MA -> M. A. Khan。仅重排既有 token，不新增信息。"""
+    out = []
+    for s in _name_parts(authors):
+        if "et al" in s.lower():
+            out.append("et al.")
+            continue
+        parts = s.split()
+        if len(parts) >= 2:
+            last = parts[0]
+            initials = []
+            for tok in parts[1:]:
+                # 把可能连续的名首字母串（如 “MA”）展开为 “M. A.”
+                initials.extend(ch + "." for ch in tok if ch.isalpha())
+            out.append((" ".join(initials) + " " + last).strip())
+        else:
+            out.append(s)
+    return out
+
+
+def _fmt_doi(e):
+    doi = str(e.get("doi", "")).strip()
+    return doi
+
+
+def _fmt_vol_issue_pages(e):
+    """卷(期):页 组合，缺失字段优雅省略，不编造。"""
+    vol = str(e.get("volume", "") or e.get("vol", "")).strip()
+    iss = str(e.get("issue", "")).strip()
+    pg = str(e.get("pages", "") or e.get("page", "")).strip()
+    bits = []
+    if vol:
+        bits.append(f"vol. {vol}")
+    if iss:
+        bits.append(f"no. {iss}")
+    if pg:
+        bits.append(f"pp. {pg}")
+    return ", ".join(bits)
+
+
+def format_entry_style(e, style):
+    """按 style 渲染一条。style in {apa, ieee, gbt7714, bibtex}。"""
+    mark = _unverified_mark(e)
+    title = str(e.get("title", "")).strip()
+    venue = str(e.get("venue", "")).strip()
+    year = str(e.get("year", "")).strip()
+    doi = _fmt_doi(e)
+    if style == "apa":
+        names = _apa_names(e.get("authors") or e.get("first_author"))
+        auth = ", ".join(names) if names else str(e.get("first_author", "")).strip()
+        # APA: Author (Year). Title. Venue, Vol(Issue), Pages. doi
+        pub = ", ".join(x for x in (venue, _fmt_vol_issue_pages(e)) if x)
+        out = f"{auth} ({year}). {title}."
+        if pub:
+            out += " " + pub + "."
+        if doi:
+            out += f" https://doi.org/{doi}"
+        return out + mark
+    if style == "ieee":
+        names = _ieee_names(e.get("authors") or e.get("first_author"))
+        auth = ", ".join(names) if names else str(e.get("first_author", "")).strip()
+        # IEEE: [N] A. B., “Title,” Venue, vol, no, pp, year.
+        loc = ", ".join(x for x in (_fmt_vol_issue_pages(e), year) if x)
+        out = f"[{e['id']}] {auth}, “{title},” {venue}"
+        if loc:
+            out += ", " + loc
+        out += "."
+        if doi:
+            out += f" doi:{doi}"
+        return out + mark
+    if style == "gbt7714":
+        names = _gbt_names(e.get("authors") or e.get("first_author"))
+        auth = ", ".join(names) if names else str(e.get("first_author", "")).strip()
+        # GB/T 7714: 作者. 标题[J]. 期刊, 年份, 卷(期): 页.
+        loc = []
+        if year:
+            loc.append(year)
+        vi = _fmt_vol_issue_pages(e)
+        if vi:
+            loc.append(vi)
+        body = f"{auth}. {title}[J]. {venue}"
+        if loc:
+            body += ", " + ", ".join(loc)
+        body += "."
+        if doi:
+            body += f" https://doi.org/{doi}."
+        return body + mark
+    if style == "bibtex":
+        key = str(e.get("key") or derive_key(e) or e["id"]).strip()
+        fields = []
+        authors = str(e.get("authors") or e.get("first_author")).strip()
+        if authors:
+            fields.append(f"  author = {{{authors}}},")
+        if title:
+            fields.append(f"  title = {{{title}}},")
+        if venue:
+            fields.append(f"  journal = {{{venue}}},")
+        if year:
+            fields.append(f"  year = {{{year}}},")
+        vol = str(e.get("volume", "") or e.get("vol", "")).strip()
+        iss = str(e.get("issue", "")).strip()
+        pg = str(e.get("pages", "") or e.get("page", "")).strip()
+        if vol:
+            fields.append(f"  volume = {{{vol}}},")
+        if iss:
+            fields.append(f"  number = {{{iss}}},")
+        if pg:
+            fields.append(f"  pages = {{{pg}}},")
+        if doi:
+            fields.append(f"  doi = {{{doi}}},")
+        if mark:
+            fields.append("  note = {未核验},")
+        body = "\n".join(fields)
+        return f"@article{{{key},\n{body}\n}}"
+    raise ValueError(f"unknown style: {style}")
+
+
+def format_entry(e, style=None):
+    """打印一条。style=None 时为 skill 默认格式（向后兼容，逐字节不变）：
+    [N] 作者, “标题,” 会议/期刊, 年份.  非 VERIFIED/MINOR 自动附（未核验）。
+    style in {apa, ieee, gbt7714, bibtex} 时按对应风格渲染。"""
+    if style:
+        return format_entry_style(e, style)
     authors = str(e.get("authors") or e.get("first_author") or "").strip().rstrip(",")
     title = str(e.get("title", "")).strip()
     tail = ", ".join(p for p in (str(e.get("venue", "")).strip(), str(e.get("year", "")).strip()) if p)
-    mark = "" if str(e.get("verify_status", "")).strip().upper() in VERIFIED_STATUS else "（未核验）"
+    mark = _unverified_mark(e)
     if tail:
         return f"[{e['id']}] {authors}, “{title},” {tail}.{mark}"
     return f"[{e['id']}] {authors}, “{title}.”{mark}"
@@ -240,8 +405,8 @@ def validate_entries(entries):
 
 # ---------------- print-refs ----------------
 
-def render_refs(entries, report_text=None):
-    """返回 (参考文献行列表, 未被引用的台账 id 列表)。"""
+def render_refs(entries, report_text=None, style=None):
+    """返回 (参考文献行列表, 未被引用的台账 id 列表)。style 见 format_entry。"""
     by_id = entries_by_id(entries)
     if report_text is not None:
         body, _, _, _ = split_refs(report_text)
@@ -259,7 +424,7 @@ def render_refs(entries, report_text=None):
     else:
         ids = sorted(by_id)
         uncited = []
-    return [format_entry(by_id[i]) for i in ids], uncited
+    return [format_entry(by_id[i], style) for i in ids], uncited
 
 
 # ---------------- renumber ----------------
@@ -350,8 +515,8 @@ def _split_keys(group):
             yield k
 
 
-def compile_report(text, entries):
-    """把草稿的 [@key] 编译为 [N] 并打印参考文献。
+def compile_report(text, entries, style=None):
+    """把草稿的 [@key] 编译为 [N] 并打印参考文献。style 见 format_entry。
     返回 (成品文本, delivery_entries, 未引用原始 id 列表)。
 
     契约：草稿只写 [@引用键]，禁止手写数字引用（发现即报错——数字只能由本函数
@@ -420,7 +585,7 @@ def compile_report(text, entries):
     prose_keep = [ln for ln in (refs or "").split("\n")
                   if ln.strip() and not re.match(r"^\s*\[\d{1,3}\]", ln)]
     out = new_body if new_body.endswith("\n") else new_body + "\n"
-    out += "\n" + f"{lvl} 参考文献\n\n" + "\n".join(format_entry(e) for e in delivery) + "\n"
+    out += "\n" + f"{lvl} 参考文献\n\n" + "\n".join(format_entry(e, style) for e in delivery) + "\n"
     if prose_keep:
         out += "\n" + "\n".join(prose_keep) + "\n"
     if new_tail.strip():
@@ -458,7 +623,7 @@ def cmd_validate(args):
 
 def cmd_print_refs(args):
     report = io.open(args.report, encoding="utf-8").read() if args.report else None
-    lines, uncited = render_refs(load_ledger(args.ledger), report)
+    lines, uncited = render_refs(load_ledger(args.ledger), report, args.style)
     print("\n".join(lines))
     if uncited:
         sys.stderr.write(f"[WARN] 台账条目未被正文引用：{uncited}——回正文补引用，或移入不编号的“扩展阅读”\n")
@@ -468,9 +633,16 @@ def cmd_print_refs(args):
 def cmd_compile(args):
     text = io.open(args.report, encoding="utf-8").read()
     entries = load_ledger(args.ledger)
-    out_text, delivery, uncited = compile_report(text, entries)
+    out_text, delivery, uncited = compile_report(text, entries, args.style)
     out = args.output or (args.report + ".final.md")
     io.open(out, "w", encoding="utf-8").write(out_text)
+    # bibtex 侧车：style=bibtex 时额外落 .bib（默认打印到 stdout，可 --bib-out 指路径）
+    if args.style == "bibtex":
+        bib_lines = [format_entry(e, "bibtex") for e in delivery]
+        bib_text = "\n\n".join(bib_lines) + "\n"
+        if args.bib_out:
+            io.open(args.bib_out, "w", encoding="utf-8").write(bib_text)
+            print(f"BibTeX 侧车：{args.bib_out}")
     ledger_out = args.ledger + ".delivery.json"
     io.open(ledger_out, "w", encoding="utf-8").write(
         json.dumps({"entries": delivery}, ensure_ascii=False, indent=2) + "\n")
@@ -660,6 +832,11 @@ def main(argv=None):
                      ("renumber", cmd_renumber), ("csv", cmd_csv)):
         p = sub.add_parser(name)
         p.add_argument("--ledger", required=True, help="citation_ledger.json 路径")
+        if name in ("compile", "print-refs"):
+            p.add_argument("--style", choices=["apa", "ieee", "gbt7714", "bibtex"], default=None,
+                           help="参考文献渲染风格；默认=现有固定格式")
+        if name == "compile":
+            p.add_argument("--bib-out", default=None, help="style=bibtex 时 BibTeX 侧车落盘路径（默认打印）")
         if name in ("compile", "print-refs", "renumber"):
             p.add_argument("--report", required=(name in ("compile", "renumber")), help="草稿/报告 markdown 路径")
         if name in ("compile", "renumber", "csv"):
