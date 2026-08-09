@@ -16,6 +16,7 @@ run_regression.py — sciverse-deep-research 一键回归门禁（stdlib 零依�
 """
 import os
 import re
+import json
 import shutil
 import subprocess
 import sys
@@ -150,6 +151,96 @@ def _selfeval_judge_nokey():
             text=True, env=env)
     last = p.stdout.strip().splitlines()[-1] if p.stdout.strip() else ""
     return p.returncode == 3, f"exit={p.returncode} {last}"
+
+
+# P2：compile 多格式引用输出（--style）。固定离线样例断言各风格渲染差异 +
+# bibtex 可解析 + 默认无 --style 时与现有格式逐字节一致（向后兼容烟囱）。
+P2LEDGER = {"entries": [
+    {"id": 1, "first_author": "Ullah", "authors": "Ullah Z, Khan R",
+     "year": "2025", "title": "High-temperature thermoelectric",
+     "venue": "Computational Materials Science", "verify_status": "VERIFIED",
+     "volume": "512", "issue": "1", "pages": "115000", "doi": "10.1016/x",
+     "aliases": ["Ullah2025"]},
+    {"id": 2, "first_author": "Broido", "authors": "Broido DA, Malorny M",
+     "year": "2007", "title": "Intrinsic lattice thermal conductivity",
+     "venue": "Applied Physics Letters", "verify_status": "UNVERIFIED",
+     "volume": "91", "pages": "231922", "aliases": ["Broido2007"]},
+]}
+
+
+def _p2_render(style):
+    with tempfile.TemporaryDirectory() as td:
+        lp = os.path.join(td, "ledger.json")
+        with open(lp, "w", encoding="utf-8") as f:
+            json.dump(P2LEDGER, f, ensure_ascii=False)
+        if style:
+            code, out = run_script("citation_ledger.py", "print-refs",
+                                   "--ledger", lp, "--style", style)
+        else:
+            code, out = run_script("citation_ledger.py", "print-refs",
+                                   "--ledger", lp)
+        return code, out
+
+
+@check("P2 默认无 --style = 现有格式（逐字节向后兼容）")
+def _p2_default_backcompat():
+    code, out = _p2_render(None)
+    expect = ("[1] Ullah Z, Khan R, “High-temperature thermoelectric,” "
+              "Computational Materials Science, 2025.\n"
+              "[2] Broido DA, Malorny M, “Intrinsic lattice thermal "
+              "conductivity,” Applied Physics Letters, 2007.（未核验）")
+    return code == 0 and out.strip() == expect, last_line(out)
+
+
+@check("P2 apa/ieee/gbt7714 渲染差异可见")
+def _p2_styles_differ():
+    _, apa = _p2_render("apa")
+    _, ieee = _p2_render("ieee")
+    _, gbt = _p2_render("gbt7714")
+    ok = ("(2025)." in apa and "https://doi.org/10.1016/x" in apa
+          and "[1] Z. Ullah" in ieee and "doi:10.1016/x" in ieee
+          and "[J]." in gbt)
+    return ok, f"apa/ieee/gbt 各自特征串命中"
+
+
+@check("P2 apa/ieee/gbt7714 三种输出互不相同")
+def _p2_styles_mutually_distinct():
+    _, a = _p2_render("apa")
+    _, b = _p2_render("ieee")
+    _, c = _p2_render("gbt7714")
+    return len({a.strip(), b.strip(), c.strip()}) == 3, "三种风格输出互异"
+
+
+@check("P2 bibtex 侧车可解析（& 无双逗号 & note 标注）")
+def _p2_bibtex():
+    code, out = _p2_render("bibtex")
+    ok = (code == 0 and "@article{Ullah2025," in out
+          and "@article{Broido2007," in out
+          and "@article{" in out
+          and "}}," not in out.replace("}},", "")  # bibtex 不应有 }}, 双尾逗
+          and "note = {未核验}," in out)
+    return ok, last_line(out)
+
+
+@check("P2 compile --style bibtex --bib-out 落盘可解析")
+def _p2_compile_bibout():
+    with tempfile.TemporaryDirectory() as td:
+        lp = os.path.join(td, "ledger.json")
+        with open(lp, "w", encoding="utf-8") as f:
+            json.dump(P2LEDGER, f, ensure_ascii=False)
+        dp = os.path.join(td, "draft.md")
+        with open(dp, "w", encoding="utf-8") as f:
+            f.write("# 综述\n两篇 [@Ullah2025; @Broido2007] 均被引用。\n## 参考文献\n")
+        bibout = os.path.join(td, "refs.bib")
+        code, out = run_script("citation_ledger.py", "compile", "--ledger", lp,
+                               "--report", dp, "--style", "bibtex",
+                               "--bib-out", bibout)
+        ok = code == 0 and os.path.exists(bibout)
+        if ok:
+            with open(bibout, encoding="utf-8") as f:
+                bib = f.read()
+            ok = "@article{Ullah2025," in bib and "@article{Broido2007," in bib
+        return ok, f"exit={code} bib_exists={os.path.exists(bibout)}"
 
 
 @check("demo 台账 compile 幂等（draft -> final 可重铸）")
