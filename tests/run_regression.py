@@ -88,6 +88,45 @@ def _delivery_gate():
     return ok, last_line(out)
 
 
+@check("space-compute-demo 台账 validate = FAIL 0")
+def _sc_ledger_validate():
+    code, out = run_script(
+        "citation_ledger.py", "validate",
+        "--ledger", "examples/space-compute-demo/.workflow/citation_ledger.json")
+    return code == 0 and "FAIL 0" in out, out.strip()
+
+
+@check("space-compute-demo 交付门禁 = FAIL 0 / WARN 0")
+def _sc_delivery_gate():
+    code, out = run_script(
+        "check_report.py", "examples/space-compute-demo/.workflow/final.md",
+        "--citation-ledger",
+        # 用已跟踪的 output delivery（.workflow/*.delivery.json 被 gitignore/未跟踪，
+        # clean clone 里不存在，门禁必须引用入仓的 output/引用台账_delivery.json）
+        "examples/space-compute-demo/output/引用台账_delivery.json")
+    ok = code == 0 and "FAIL 0" in out and "WARN 0" in out
+    return ok, last_line(out)
+
+
+@check("space-compute-demo 台账 compile 幂等（draft -> final 可重铸）")
+def _sc_compile_idempotent():
+    with tempfile.TemporaryDirectory() as td:
+        out_md = os.path.join(td, "final.md")
+        code, out = run_script(
+            "citation_ledger.py", "compile",
+            "--ledger", "examples/space-compute-demo/.workflow/citation_ledger.json",
+            "--report", "examples/space-compute-demo/.workflow/draft.md",
+            "--output", out_md)
+        if code != 0:
+            return False, last_line(out)
+        with open(out_md) as f:
+            compiled = f.read()
+        leftover_keys = re.search(r"\[@[^\]]+\]", compiled) is not None
+        has_numcite = re.search(r"\[\d+\]", compiled) is not None
+        return (not leftover_keys) and has_numcite, \
+            f"残留键={leftover_keys} 数字引用={has_numcite}"
+
+
 @check("detect_latex 探测可执行")
 def _detect_latex():
     # 不断言 level=full（没装 LaTeX 的机器也应跑通），只要求正常退出且给出 level
