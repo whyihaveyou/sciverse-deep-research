@@ -323,7 +323,7 @@ def cmd_judge(args):
         {"role": "user", "content": _build_user_prompt(md, args.message)},
     ]
     for i in range(args.samples):
-        content, err = _chat_once(base, key, JUDGE_MODEL, messages)
+        content, err = _chat_once(base, key, JUDGE_MODEL, messages, timeout=args.timeout)
         if err:
             last_err = err
             print(f"[self_eval] 第 {i+1}/{args.samples} 次采样失败: {err}", file=sys.stderr)
@@ -465,6 +465,7 @@ def main():
     sj.add_argument("--report", required=True)
     sj.add_argument("--samples", type=int, default=5)
     sj.add_argument("--message", default=None)
+    sj.add_argument("--timeout", type=int, default=480, help="单次 judge 采样秒级超时（deepseek 慢时需>120）")
 
     args = ap.parse_args()
     if args.selftest:
