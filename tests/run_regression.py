@@ -134,6 +134,46 @@ def _detect_latex():
     return code == 0 and "level=" in out, last_line(out)
 
 
+# md_to_pdf 的 normalize/mathify 是纯文本变换（不触发 LaTeX/Pandoc），
+# 可确定性离线断言：ASCII 直引号归零、裸 `x_i` 焊接成 `$x_{i}$` 数学、
+# smartquote 不误伤已归档的 $...$ 数学块。这是 M3 渲染修复的根因回归。
+@check("md_to_pdf normalize 直引号归零 + 裸公式数学化")
+def _md_normalize():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "md_to_pdf", os.path.join(SCRIPTS, "md_to_pdf.py"))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    cases = [
+        # (输入, 必须含, 必须不含)
+        (u'他说"这是关键"', u'“这是关键”', u'"'),
+        (u'公式 x_i 与 t^(−d_s/2) 相关', u'$x_{i}$', None),
+        (u'已有 $\\kappa$ 数学块保留', u'$\\kappa$', None),
+    ]
+    fails = []
+    for src, must_have, must_not in cases:
+        out = m.normalize(src)
+        if must_have and must_have not in out:
+            fails.append(f"{src!r} -> 缺 {must_have!r}: {out!r}")
+        if must_not and must_not in out:
+            fails.append(f"{src!r} -> 意外含 {must_not!r}: {out!r}")
+    if fails:
+        return False, "; ".join(fails)
+    # 抓一个真实遗留稿做基准：230 个直引号应全部归零（若不存在该稿则跳过，不断言）
+    demo = os.path.join(
+        ROOT, "examples", "spectral-dimension-survey",
+        "谱维数与拉普拉斯谱_随机行走综述.md")
+    if os.path.isfile(demo):
+        raw = open(demo, encoding="utf-8").read()
+        n_raw = raw.count('"')
+        n_norm = m.normalize(raw).count('"')
+        if n_raw and n_norm != 0:
+            fails.append(f"遗留稿直引号 {n_raw} -> normalized 后仍剩 {n_norm}")
+    if fails:
+        return False, "; ".join(fails)
+    return True, "直引号归零 + 数学化 OK"
+
+
 # fetch_sources.py 是网络脚本（arXiv/OpenAlex），回归只做离线 CLI 契约断言，
 # 不触发真实 HTTP，保证任何环境（含无网/离线 CI）下确定性可复现。
 @check("fetch_sources --list 离线可用")
