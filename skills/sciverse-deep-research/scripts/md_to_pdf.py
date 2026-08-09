@@ -546,10 +546,12 @@ def pandoc_pdf(norm_md, out_pdf, pandoc, keep_tex):
     这里用 pandoc 生成 .tex 再交给 xelatex，语义与手写回退一致。"""
     base = os.path.splitext(out_pdf)[0]
     tex = base + ".tex"
-    font = detect_cjk_font_name()
-    cmd = [pandoc, norm_md, "-o", tex, "--pdf-engine=xelatex", "-f", "markdown+smart"]
-    if font:
-        cmd += ["-V", "CJKmainfont=%s" % font]
+    # 关键修复：pandoc 默认产出 .tex 是「片段」（无 documentclass/preamble，开头即
+    # \section），直接交给 xelatex 必报 Undefined control sequence。必须 -s(standalone)
+    # 让 pandoc 用自带 LaTeX 模板生成完整文档；documentclass=ctexart 让 ctex 在
+    # xelatex 下自动配置中文字体（macOS + TeX Live 可直接用），无需手挑 CJKmainfont。
+    cmd = [pandoc, norm_md, "-o", tex, "--pdf-engine=xelatex",
+           "-f", "markdown+smart", "-s", "-V", "documentclass=ctexart"]
     r = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
     if r.returncode != 0 or not os.path.exists(tex):
         print("[md_to_pdf] pandoc 转 tex 失败(exit=%s)" % r.returncode, file=sys.stderr)
@@ -660,9 +662,15 @@ def main():
             print("[md_to_pdf] pandoc 路径失败，回退到手写转换器", file=sys.stderr)
         tex_path = fallback_render(tmp_md, args.engine)
         rc = build(tex_path, args.engine, args.keep_tex)
-        if rc == 0 and os.path.exists(base + ".pdf") and os.path.abspath(base + ".pdf") != os.path.abspath(out):
-            shutil.move(base + ".pdf", out)
-            print("[md_to_pdf] 移动到: %s" % out)
+        if rc == 0:
+            # build 以 tex_path 为基准产出同名 pdf——此处 tex_path 来自
+            # base+".normalized.md"，故实际产物是 base+".normalized.pdf"。
+            # 按“实际产物”移成 out（默认 base.pdf），不再预设 base+".pdf"（旧逻辑
+            # if exists(base+".pdf") 恒为假，导致默认产出一套 normalized 名、out 落空）。
+            produced = os.path.splitext(tex_path)[0] + ".pdf"
+            if os.path.exists(produced) and os.path.abspath(produced) != os.path.abspath(out):
+                shutil.move(produced, out)
+                print("[md_to_pdf] 移动到: %s" % out)
         return rc
     finally:
         if os.path.exists(tmp_md) and not args.keep_tex:
