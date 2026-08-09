@@ -4,6 +4,20 @@
 
 一句话：sciverse 负责"搜得到、查得准"，本模块负责"引得对、关把得住"。
 
+## 谁该读哪份（2×2）
+
+这份 README 是项目主页，给**人**和**开发者**看。真正去**装**和**用**时，按角色取两份材料：
+
+| 阶段 | 给 **人** | 给 **Agent** |
+|------|-----------|--------------|
+| **安装** | [HUMAN-QUICKSTART.md](HUMAN-QUICKSTART.md)（人只做 4 件事） | [AGENT-BOOTSTRAP.md](AGENT-BOOTSTRAP.md)（任意框架 3 步自装配） |
+| **使用** | [HUMAN-QUICKSTART.md](HUMAN-QUICKSTART.md)（一句话丢任务） | `SKILL.md`（运行时完整流程） |
+
+- **你（人）**：装 Agent → 要一个 sciverse token → 克隆仓库 → 跑 `install.sh`，然后
+  **一句话让 Agent 做综述**。详见 **[HUMAN-QUICKSTART.md](HUMAN-QUICKSTART.md)**。
+- **你的 Agent**：让它读 **[AGENT-BOOTSTRAP.md](AGENT-BOOTSTRAP.md)**，它会自己配好
+  skill + 两个 MCP server（人不需要会写 MCP 配置）。
+
 ## 三层结构
 
 ```
@@ -23,6 +37,7 @@ sciverse-deep-research/
 ├── examples/spectral-dimension-demo/# 端到端真实用例（6 篇文献的小型综述，全门禁通过）
 ├── examples/space-compute-demo/     # 端到端真实用例（14 篇空间算力综述 + PDF 排版视图）
 ├── AGENT-BOOTSTRAP.md               # Agent-Ready 引导：任意 agent 读到即可一步步配好 MCP + skill
+├── HUMAN-QUICKSTART.md              # 人向 Quickstart：安装/使用时人只做哪几件事（与 AGENT-BOOTSTRAP 成对）
 └── install.sh                       # 检测本机 agent → symlink skill → 打印 MCP 配置片段
 ```
 
