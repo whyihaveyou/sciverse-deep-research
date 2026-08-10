@@ -162,6 +162,18 @@ def _tilde_if(base):
     return base
 
 
+def _conv_inner(inner):
+    """组内（下标/上标内容）处理：希腊字母与数学符号 → LaTeX 命令。"""
+    inner = re.sub(r"[\u0370-\u03ff\u2148]", _greek_to_cmd, inner)
+    return re.sub(r"[\u2192\u221e\u2264\u2265\u2248\u2260\u27fa\u2261\u21d2\u00d7\u00b7]",
+                  lambda mm: {"\u2192": r"\to", "\u221e": r"\infty",
+                              "\u2264": r"\leq", "\u2265": r"\geq",
+                              "\u2248": r"\approx", "\u2260": r"\neq",
+                              "\u27fa": r"\iff", "\u2261": r"\equiv",
+                              "\u21d2": r"\Rightarrow", "\u00d7": r"\times",
+                              "\u00b7": r"\cdot"}[mm.group(0)], inner)
+
+
 def _mathify_atom(m):
     base, op = m.group(1), m.group(2)
     brace, paren, tok = m.group(3), m.group(4), m.group(5)
@@ -176,15 +188,7 @@ def _mathify_atom(m):
         inner = grp[1:-1]
     else:
         inner = grp
-    inner = re.sub(r"[\u0370-\u03ff\u2148]", _greek_to_cmd, inner)
-    # 组内的数学符号（→ ∞ ≤ ≈ ⟺ 等）→ LaTeX（这些在数学组里不上缺字形，但写命令更稳）
-    inner = re.sub(r"[\u2192\u221e\u2264\u2265\u2248\u2260\u27fa\u2261\u21d2\u00d7\u00b7]",
-                   lambda mm: {"\u2192": r"\to", "\u221e": r"\infty",
-                               "\u2264": r"\leq", "\u2265": r"\geq",
-                               "\u2248": r"\approx", "\u2260": r"\neq",
-                               "\u27fa": r"\iff", "\u2261": r"\equiv",
-                               "\u21d2": r"\Rightarrow", "\u00d7": r"\times",
-                               "\u00b7": r"\cdot"}[mm.group(0)], inner)
+    inner = _conv_inner(inner)
     braced = "{" + inner + "}"
     return "${base}{op}{braced}$".format(base=base, op=op, braced=braced)
 
@@ -234,6 +238,29 @@ def mathify(text):
         return "".join(out)
     text = symbol_pass(text)
 
+    # ④ 连写 _ / ^ 合并：$a_{1}$^2 → $a_{1}^{2}$（只吸附紧贴数学闭 $ 后的脚本）。
+    #    已花括号形态 n^{-d_s/2} 无尾随脚本，不受影响。
+    def chain_merge(s):
+        pat = re.compile(
+            r"(\$[^$\n]+\}\$)([_^])"
+            r"((?:\{[^{}]*\})|(?:\([^()]*\))|[A-Za-z0-9\u0370-\u03ff+\-./:;,]+)")
+        while True:
+            mm = pat.search(s)
+            if not mm:
+                break
+            head, op, grp = mm.group(1), mm.group(2), mm.group(3)
+            if grp.startswith("{"):
+                inner = grp[1:-1]
+            elif grp.startswith("("):
+                inner = grp[1:-1]
+            else:
+                inner = grp
+            inner = _conv_inner(inner)
+            new = head[:-1] + op + "{" + inner + "}$"
+            s = s[:mm.start()] + new + s[mm.end():]
+        return s
+    text = chain_merge(text)
+
     def unstore(m):
         return protected[int(m.group(1))]
     return re.sub(r"\x00P(\d+)\x00", unstore, text)
@@ -256,8 +283,10 @@ def smart_quotes(text):
     while i < len(text):
         ch = text[i]
         if ch == "\u201c" or ch == "\u201d":
-            # 既有弯引号作为配对状态锚点
-            open_q = (ch == "\u201c")
+            # 既有弯引号作为配对状态锚点。
+            # 语义：见到开引号「”…」之后下一个 ASCII " 应为闭；见到闭引号
+            # 「…”」之后下一个 ASCII " 应为开。故 open_q = (ch 为闭引号)。
+            open_q = (ch == "\u201d")
             buf.append(ch)
         elif ch == '"':
             buf.append("\u201c" if open_q else "\u201d")
