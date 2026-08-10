@@ -28,12 +28,18 @@ check_report.py — 交付前机械门禁（必跑；FAIL 未消解不得交付�
      台账孤儿条目 WARN；语义邻近检查——[N] 同句的系统/方法名与台账第 N 条冲突 → FAIL，
      点名未引用 → WARN（表格/标题行免 WARN 防误报）；正文有参考文献节却零内联 [n] → FAIL
      （该条不依赖台账）；台账在场时首现顺序降 WARN（美观由 citation_ledger.py renumber 原子治理）。
+  9. 数学裸残留（O2 交付纪律）：正文（跳过代码栅栏与已归档 $...$ 数学块）残留未用
+     $...$ 包裹的裸 `_`/`^`（如 `d_s`、`x^2`）→ FAIL——写作纪律要求数学一律 `$...$`。
+  10. 非标准术语（O2 交付纪律）：可配小词表（--terms json，fail/warn 两类）命中——
+     fail 词 = FAIL、warn 词 = WARN（治"话不是标准专业术语"；默认表保守，靠配置承重）。
 
 用法：
   python3 scripts/check_report.py 报告.md                 # 模式自动识别
   python3 scripts/check_report.py 报告.md --mode strict   # 显式指定
   python3 scripts/check_report.py 报告.md --ledger 台账.md # 题录台账单独成文时
   python3 scripts/check_report.py 报告.md --citation-ledger .workflow/citation_ledger.json
+  python3 scripts/check_report.py 报告.md --terms terms.json      # 覆盖非标准术语小词表
+  python3 scripts/check_report.py 报告.md --export-clean 交付.md  # 交付默认出数学干净 md
   python3 scripts/check_report.py --selftest
 
 解析原则：宽容读取——解析不到的项打 INFO 跳过，不猜、不硬报错；
@@ -463,6 +469,99 @@ def check_body_urls(f, body):
             f.add("FAIL", "正文URL", f"L{no} 正文出现裸 URL/DOI（'{m.group(0)[:40]}…'）——引用一律 [N] 编号，链接不进正文")
 
 
+# ---------------- O2 交付纪律：数学裸残留 + 非标准术语（check 必须承重） ----------------
+
+# 裸 `_`/`^` 公式残留：`d_s`、`x^2`、`P_ii` 这类未用 $...$ 包裹的纯文本数学。
+# 写作纪律要求数学一律 $...$（见 md_to_pdf.normalize 的焊接：$d_{s}$、$x^{2}$）。
+BARE_SUBSUP = re.compile(r"[A-Za-z0-9](?:[_^])[A-Za-z0-9](?:[_^][A-Za-z0-9]|[A-Za-z0-9_^])*|"
+                         r"[A-Za-z](?:[_^])\{[^{}]*\}")
+# 上面正则为了报出完整残留串：`d_s`、`x^2`、`P_ii`、`a_1^2` 整段；花括号形态 `x_{i}` 也在内。
+
+
+def _strip_math_spans(line):
+    """去掉行内已归档的 $...$ 数学块（含 $$...$$ 与转义 \$），返回剩余部分——
+    数学块内部的下标/上标是合法 TeX，不是"裸残留"，不能误报自己人。"""
+    parts = []
+    last = 0
+    # 保护代码 span `...`
+    for m in re.finditer(r"`[^`]*`", line):
+        parts.append(line[last:m.start()])
+        parts.append("\x00")
+        last = m.end()
+    parts.append(line[last:])
+    line = "".join(parts)
+    out, last = [], 0
+    pat = re.compile(r"(?<!\\)\$(?:[^$\n]|\\\$)*?\$|\$\$[^$]*?\$\$")
+    for m in pat.finditer(line):
+        out.append(line[last:m.start()])
+        out.append("\x00")
+        last = m.end()
+    out.append(line[last:])
+    return "".join(out)
+
+
+def check_math_residue(f, body):
+    """正文未用 $...$ 包裹的裸 `_`/`^` 公式残留 = FAIL（O2：数学一律 $...$）。
+    跳过代码栅栏与已归档 $...$ 数学块（后者是合法 TeX），只抓真正的裸文本公式。"""
+    in_code = False
+    for no, line in iter_lines_with_no(body):
+        if line.strip().startswith("```"):
+            in_code = not in_code
+            continue
+        if in_code:
+            continue
+        seg = _strip_math_spans(line)
+        for m in BARE_SUBSUP.finditer(seg):
+            f.add("FAIL", "数学残留",
+                  f"L{no} 裸公式 '{m.group(0)}' 未用 $...$ 包裹——数学一律 $...$（写作纪律 O2，可 md_to_pdf.normalize 自动焊接）")
+
+
+# 非标准术语（治"话不是标准专业术语"）。默认表保守（宁可漏不误报），
+# 真正的承重靠 --terms 配置：{"fail": {"词": "建议"}, "warn": {"词": "建议"}}。
+DEFAULT_TERMS = {
+    "fail": {
+        # 确凿非标准/伪术语 → 必纠 FAIL。默认留空，由 --terms 按学科配置承重。
+    },
+    "warn": {
+        "相变阶次": "邱/学报偏好'相变级别'（一阶/连续相变的级别表述）",
+    },
+}
+
+
+def check_terminology(f, body, terms):
+    """可配小词表命中评估：fail 词 = FAIL、warn 词 = WARN。
+    只扫正文文本（跳代码栅栏与 $...$ 数学块），报行号 + 命中词 + 建议。"""
+    if not terms:
+        terms = DEFAULT_TERMS
+    fail_terms = terms.get("fail") or {}
+    warn_terms = terms.get("warn") or {}
+    in_code = False
+    for no, line in iter_lines_with_no(body):
+        if line.strip().startswith("```"):
+            in_code = not in_code
+            continue
+        if in_code:
+            continue
+        seg = _strip_math_spans(line)
+        for word, advice in fail_terms.items():
+            if not word:
+                continue
+            for _ in re.finditer(re.escape(word), seg):
+                f.add("FAIL", "术语", f"L{no} 非标准术语 '{word}'——{advice}")
+        for word, advice in warn_terms.items():
+            if not word:
+                continue
+            for _ in re.finditer(re.escape(word), seg):
+                f.add("WARN", "术语", f"L{no} 术语表述 '{word}' 需核对——{advice}")
+
+
+def export_clean_md(report_text):
+    """交付默认出数学干净 md：对着 final.md 做 normalize（弯引号 + 纯文本数学焊接）。
+    final.md 仍是 compile 的确定性事实源，本函数只产出排版/交付视图，不改事实源。"""
+    from md_to_pdf import normalize
+    return normalize(report_text)
+
+
 def check_mode_structure(f, mode, report_text, refs, ledger_text):
     if mode == "survey":
         if LEDGER_MARK in report_text:
@@ -575,7 +674,7 @@ def _ledger_from_data(data):
 
 # ---------------- driver ----------------
 
-def run_checks(report_text, ledger_extra="", mode="auto", citation_ledger=None):
+def run_checks(report_text, ledger_extra="", mode="auto", citation_ledger=None, terms=None):
     f = Findings()
     embedded = LEDGER_MARK in report_text
     if mode == "auto":
@@ -588,6 +687,8 @@ def run_checks(report_text, ledger_extra="", mode="auto", citation_ledger=None):
 
     check_blacklist(f, body)
     check_body_urls(f, body_cite)
+    check_math_residue(f, body)              # O2：数学裸残留 FAIL（自身跳过 code 栅栏/$..$）
+    check_terminology(f, body, terms)        # O2：非标准术语 FAIL/WARN（可配小词表）
     check_citekey_residue(f, body_cite, refs)
     check_citations(f, body_cite, refs, ledger_mode=citation_ledger is not None)
     check_ref_count_claims(f, body_cite, refs)
@@ -606,6 +707,8 @@ def main(argv=None):
     ap.add_argument("--ledger", help="题录核验台账单独成文时的文件路径")
     ap.add_argument("--citation-ledger", help="引用台账 citation_ledger.json（v6.0 单写架构，启用三方对齐检查）")
     ap.add_argument("--mode", choices=["auto", "survey", "strict"], default="auto")
+    ap.add_argument("--terms", help="非标准术语小词表 JSON（{\"fail\": {\"词\": \"建议\"}, \"warn\": {...}}），覆盖默认")
+    ap.add_argument("--export-clean", help="交付默认出数学干净 md（normalize 后）的输出路径；final.md 仍是事实源")
     ap.add_argument("--selftest", action="store_true")
     args = ap.parse_args(argv)
 
@@ -614,6 +717,15 @@ def main(argv=None):
     if not args.report:
         ap.error("缺少报告文件（或用 --selftest）")
     text = io.open(args.report, encoding="utf-8").read()
+    terms = None
+    if args.terms:
+        try:
+            terms = json.loads(io.open(args.terms, encoding="utf-8").read())
+        except Exception as exc:
+            print("== check_report ==  mode: n/a")
+            print(f"[FAIL] 术语表: --terms 不可解析（{exc}）——须为 {{'fail': {{}}, 'warn': {{}}}} 结构")
+            print("summary: FAIL 1 / WARN 0 / INFO 0")
+            return 1
     extra = io.open(args.ledger, encoding="utf-8").read() if args.ledger else ""
     cledger = None
     if args.citation_ledger:
@@ -631,9 +743,18 @@ def main(argv=None):
                 print(f"[FAIL] 台账校验: {x}")
             print(f"summary: FAIL {len(lfails)} / WARN 0 / INFO 0")
             return 1
-    mode, f = run_checks(text, extra, args.mode, cledger)
+    mode, f = run_checks(text, extra, args.mode, cledger, terms)
     print(f"== check_report ==  mode: {mode}")
     print(f.render())
+    if args.export_clean:
+        try:
+            clean = export_clean_md(text)
+            with io.open(args.export_clean, "w", encoding="utf-8") as fo:
+                fo.write(clean)
+            print(f"export-clean: 已写出数学干净交付视图 -> {args.export_clean}")
+        except Exception as exc:
+            print(f"[FAIL] export-clean: 生成干净 md 失败（{exc}）——final.md 仍是唯一事实源，可重试")
+            return 1
     return 1 if f.count("FAIL") else 0
 
 
@@ -956,6 +1077,38 @@ def selftest():
     mode, f = run_checks("# 综述\n结论见 [@PatchCore] 与 [1]。\n## 参考文献\n[1] A, \"T,\" V, 2020.", mode="survey")
     expect(any(l == "FAIL" and c == "引用编译" for l, c, _ in f.items),
            "v6.1：交付物残留未编译引用键 [@…] → FAIL（compile 必须跑完）")
+
+    mode, f = run_checks("""# 综述
+## 二、研究方法
+滚雪球 1 轮，末轮新增 0 篇，达检索饱和。
+## 四、分支
+该尺度的相关长度为 d_s，衰减率近似 x^2，且 P_ii 随维度增大。
+已规范形态 $x_{i}$ 与 $\\kappa$ 不是残留。
+```python
+d_s = index.query(x^2)  # 代码块内不判
+```
+## 参考文献
+[1] A, "T," V, 2020.
+""", mode="survey")
+    expect(any(l == "FAIL" and c == "数学残留" for l, c, _ in f.items), "O2：正文裸 d_s/x^2/P_ii = FAIL（数学一律 $...$）")
+    expect(not any("\\kappa" in m and c == "数学残留" for _, c, m in f.items), "O2：已归档 $..$ 数学块不误报")
+    expect(not any("代码块" in m for _, c, m in f.items if c == "数学残留"), "O2：代码栅栏内裸公式不误报")
+
+    custom = {"fail": {"无标度性": "应写'无标度（scale-free）'标准表述"}, "warn": {"相变阶次": "邱偏好'相变级别'"}}
+    mode, f = run_checks("""# 综述
+## 四、分支
+该网络具有无标度性。相变阶次以低维更锐利。
+## 参考文献
+[1] A, "T," V, 2020.
+""", mode="survey", terms=custom)
+    expect(any(l == "FAIL" and c == "术语" for l, c, _ in f.items), "O2：--terms fail 词命中 = FAIL")
+    expect(any(l == "WARN" and c == "术语" for l, c, _ in f.items), "O2：--terms warn 词命中 = WARN")
+
+    clean = export_clean_md("尺度 d_s 与 x^2 相关[1]。\n## 参考文献\n[1] A, \"T,\" V, 2020.")
+    expect(("d_s" not in clean) and ("x^2" not in clean) and "$" in clean,
+           "O2：export-clean 输出数学干净（裸公式焊接成 $...$）")
+    expect("[1]" in clean and "V, 2020" in clean,
+           "O2：export-clean 不改引用编号/参考文献（compile 链路不受影响）")
 
     print("SELFTEST " + ("PASS" if ok else "FAIL"))
     return 0 if ok else 1
