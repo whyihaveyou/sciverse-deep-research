@@ -134,6 +134,32 @@ def _detect_latex():
     return code == 0 and "level=" in out, last_line(out)
 
 
+# O1(P5) Phase A：阶段单元工件契约 + 续跑确定性 + 预算记账（治上下文漂移根因的轻量验证底盘）。
+@check("O1 PhaseA stage_contract 工件契约 check")
+def _phasea_contract():
+    code, out = run_script("stage_contract.py", "check", "examples/dft-kL-demo/.workflow")
+    return code == 0 and "PASS" in out, last_line(out)
+
+
+@check("O1 PhaseA 续跑确定性（compile 幂等，换上下文不漂移）")
+def _phasea_resume_idempotent():
+    code, out = run_script("stage_contract.py", "resume-idempotent", "examples/dft-kL-demo/.workflow")
+    return code == 0 and "逐字节一致" in out, last_line(out)
+
+
+@check("O1 PhaseA budget 超限记账 = exit 1（漂移触发器，不得带病完工）")
+def _phasea_budget_over():
+    import json as _json
+    with tempfile.TemporaryDirectory() as td:
+        cf = os.path.join(td, "cost.json"); bf = os.path.join(td, "b.json")
+        with open(cf, "w") as f:
+            _json.dump({"spent": {"synthesis": 999999}}, f)
+        with open(bf, "w") as f:
+            _json.dump({"limits": {"synthesis": 100}, "cost_log": cf}, f)
+        code, out = run_script("stage_contract.py", "budget", bf, "examples/dft-kL-demo/.workflow")
+        return code == 1 and "超预算" in out, last_line(out)
+
+
 # md_to_pdf 的 normalize/mathify 是纯文本变换（不触发 LaTeX/Pandoc），
 # 可确定性离线断言：ASCII 直引号归零、裸 `x_i` 焊接成 `$x_{i}$` 数学、
 # smartquote 不误伤已归档的 $...$ 数学块。这是 M3 渲染修复的根因回归。
