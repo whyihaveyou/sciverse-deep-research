@@ -134,6 +134,97 @@ def _detect_latex():
     return code == 0 and "level=" in out, last_line(out)
 
 
+# md_to_pdf 的 normalize/mathify 是纯文本变换（不触发 LaTeX/Pandoc），
+# 可确定性离线断言：ASCII 直引号归零、裸 `x_i` 焊接成 `$x_{i}$` 数学、
+# smartquote 不误伤已归档的 $...$ 数学块。这是 M3 渲染修复的根因回归。
+@check("md_to_pdf normalize 直引号归零 + 裸公式数学化")
+def _md_normalize():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "md_to_pdf", os.path.join(SCRIPTS, "md_to_pdf.py"))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    cases = [
+        # (输入, 必须含, 必须不含)
+        (u'他说"这是关键"', u'“这是关键”', u'"'),
+        (u'公式 x_i 与 t^(−d_s/2) 相关', u'$x_{i}$', None),
+        (u'已有 $\\kappa$ 数学块保留', u'$\\kappa$', None),
+    ]
+    fails = []
+    for src, must_have, must_not in cases:
+        out = m.normalize(src)
+        if must_have and must_have not in out:
+            fails.append(f"{src!r} -> 缺 {must_have!r}: {out!r}")
+        if must_not and must_not in out:
+            fails.append(f"{src!r} -> 意外含 {must_not!r}: {out!r}")
+    if fails:
+        return False, "; ".join(fails)
+    # 抓一个真实遗留稿做基准：230 个直引号应全部归零（若不存在该稿则跳过，不断言）
+    demo = os.path.join(
+        ROOT, "examples", "spectral-dimension-survey",
+        "谱维数与拉普拉斯谱_随机行走综述.md")
+    if os.path.isfile(demo):
+        raw = open(demo, encoding="utf-8").read()
+        n_raw = raw.count('"')
+        n_norm = m.normalize(raw).count('"')
+        if n_raw and n_norm != 0:
+            fails.append(f"遗留稿直引号 {n_raw} -> normalized 后仍剩 {n_norm}")
+    if fails:
+        return False, "; ".join(fails)
+    return True, "直引号归零 + 数学化 OK"
+
+
+# M3 收尾回归：审查员审计提的潜伏缺陷——混排弯引号锚点方向、连写下标+上标不焊。
+# 覆盖：①多对交替弯引号/代码内引号保护；②裸公式焊接（含连写 _^）；③已归档
+# $..$/代码块不被误伤；④normalize 幂等。stdlib 零依赖。
+@check("md_to_pdf normalize edge（混排引号锚点 + 连写脚本焊接 + 幂等）")
+def _md_normalize_edge():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "md_to_pdf", os.path.join(SCRIPTS, "md_to_pdf.py"))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    fails = []
+
+    def eq(name, src, want):
+        got = m.normalize(src)
+        if got != want:
+            fails.append(f"{name}: {src!r} -> {got!r}, 期望 {want!r}")
+
+    # ① 混排弯引号锚点方向（ASCII 对方向不再反）+ 多对交替 + 代码内引号保护
+    eq("混排弯引号锚点", u'“A” then "B"', u'“A” then “B”')
+    eq("交替两对", u'"甲" 与 "乙"', u'“甲” 与 “乙”')
+    # 代码跨度内的 " 不参与配对（保护段原样保留）
+    eq("代码内引号保护", u'`print("a")` 前后 "x"', u'`print("a")` 前后 “x”')
+    # 裸 ASCII 单对归零
+    eq("裸一对归零", u'他说"关键"', u'他说“关键”')
+
+    # ② 裸公式焊接：连写下标+上标并入同一数学块；花括号形态保持
+    eq("连写下标+上标", u'a_1^2', u'$a_{1}^{2}$')
+    eq("连写上标+下标", u'a^2_1', u'$a^{2}_{1}$')
+    eq("三段连写", u'a_1^2_3', u'$a_{1}^{2}_{3}$')
+    eq("花括号形态保持", u'n^{-d_s/2}', u'$n^{-d_s/2}$')
+    eq("裸单词下标", u'd_s', u'$d_{s}$')
+    eq("裸组合波浪线", u'd\u0303', u'$\\tilde{d}$')
+
+    # ③ 已归档 $..$ / 代码块不被误伤
+    eq("已归档数学块保留", u'已含 $\\kappa$ 块', u'已含 $\\kappa$ 块')
+    eq("数学块内引号不被改", u'$"a"$ 保留', u'$"a"$ 保留')
+    eq("代码块内数学不加焊", u'`x_i` 是代码', u'`x_i` 是代码')
+
+    # ④ normalize 幂等
+    for src in (u'“A” then "B"', u'a_1^2', u'n^{-d_s/2}', u'他说"关键" 与 $\\kappa$'):
+        once = m.normalize(src)
+        twice = m.normalize(once)
+        if once != twice:
+            fails.append(f"幂等失效: {src!r} -> {once!r} != {twice!r}")
+
+    if fails:
+        return False, "; ".join(fails)
+    return True, "edge 全过（引号锚点/连写脚本/归档保护/幂等）"
+
+
+
 # fetch_sources.py 是网络脚本（arXiv/OpenAlex），回归只做离线 CLI 契约断言，
 # 不触发真实 HTTP，保证任何环境（含无网/离线 CI）下确定性可复现。
 @check("fetch_sources --list 离线可用")
