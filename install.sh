@@ -26,25 +26,59 @@ declare -a AGENTS=(
 )
 
 installed=()
+conflicted=()
+failed=()
+
+# 单个 agent 的安装子例程。返回码：0=已链接（含修复断链），1=有冲突需手动处理，
+# 2=未检测到该 agent，3=安装动作本身失败。任何返回码都不中断后续 agent。
+install_one() {
+  local name="$1" dir="$2"
+  local parent target dest
+  parent="$(dirname "$dir")"
+  if [ ! -d "$parent" ] && [ ! -d "$dir" ]; then
+    echo "[$name] 未检测到安装（$parent 不存在），跳过"
+    return 2
+  fi
+  mkdir -p "$dir" || { echo "[$name] mkdir $dir 失败" >&2; return 3; }
+  target="$dir/$SKILL_NAME"
+  if [ -L "$target" ]; then
+    dest="$(readlink "$target")"
+    if [ "$dest" = "$SKILL_SRC" ]; then
+      echo "[$name] 已链接，跳过"
+    elif [ ! -e "$target" ]; then
+      # 失效符号链接（断链，多为仓库搬过家）——目标已不存在，直接修正指向
+      ln -sfn "$SKILL_SRC" "$target" || { echo "[$name] 修复断链失败" >&2; return 3; }
+      echo "[$name] 修复断链: $target -> $SKILL_SRC（原指向 $dest）"
+    else
+      echo "[$name] $target 已是指向其他位置的链接（$dest），跳过（请手动处理）" >&2
+      return 1
+    fi
+  elif [ -e "$target" ]; then
+    echo "[$name] $target 已存在且不是符号链接，跳过（请手动处理）" >&2
+    return 1
+  else
+    ln -s "$SKILL_SRC" "$target" || { echo "[$name] ln -s 失败" >&2; return 3; }
+    echo "[$name] skill 已链接: $target -> $SKILL_SRC"
+  fi
+  return 0
+}
+
 for entry in "${AGENTS[@]}"; do
   name="${entry%%|*}"; dir="${entry##*|}"
-  parent="$(dirname "$dir")"
-  if [ -d "$parent" ] || [ -d "$dir" ]; then
-    mkdir -p "$dir"
-    target="$dir/$SKILL_NAME"
-    if [ -L "$target" ] && [ "$(readlink "$target")" = "$SKILL_SRC" ]; then
-      echo "[$name] 已链接，跳过"
-    elif [ -e "$target" ]; then
-      echo "[$name] $target 已存在且不是本仓库的链接，跳过（请手动处理）" >&2
-    else
-      ln -s "$SKILL_SRC" "$target"
-      echo "[$name] skill 已链接: $target -> $SKILL_SRC"
-    fi
-    installed+=("$name")
-  else
-    echo "[$name] 未检测到安装（$parent 不存在），跳过"
-  fi
+  rc=0
+  install_one "$name" "$dir" || rc=$?
+  case $rc in
+    0) installed+=("$name") ;;
+    1) conflicted+=("$name") ;;
+    3) failed+=("$name") ;;
+  esac
 done
+
+if [ "${#conflicted[@]}" -gt 0 ] || [ "${#failed[@]}" -gt 0 ]; then
+  echo "" >&2
+  [ "${#conflicted[@]}" -gt 0 ] && echo "需手动处理（目标被占用）：${conflicted[*]}" >&2
+  [ "${#failed[@]}" -gt 0 ] && echo "安装失败：${failed[*]}" >&2
+fi
 
 cat <<EOF
 

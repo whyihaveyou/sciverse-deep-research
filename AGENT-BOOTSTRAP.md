@@ -36,10 +36,10 @@
 
 ## Step 1 — 安装 skill（一份，多 agent 符号链接）
 
-skill 本体在 `/Users/qzp/科研项目/sciverse-deep-research/skills/sciverse-deep-research`。直接跑安装脚本：
+skill 本体在 `<仓库根目录>/skills/sciverse-deep-research`（`<仓库根目录>` = 你本机克隆仓库的绝对路径，下同）。直接跑安装脚本：
 
 ```bash
-/Users/qzp/科研项目/sciverse-deep-research/install.sh
+cd <仓库根目录> && ./install.sh
 ```
 
 它会自动检测本机已装 agent 并符号链接 skill。**注意**：Hermes 的 skill 必须放在
@@ -98,7 +98,7 @@ API Token 和自定义 PATH 都要显式传。先用 `which npx uv` 找到绝对
 - **Hermes（命令）**：
   ```bash
   hermes mcp add sciverse-survey-gates \
-    --command uv --args run --project /Users/<你>/sciverse-deep-research/mcp-server sciverse-survey-gates
+    --command uv --args run --project <仓库根目录>/mcp-server sciverse-survey-gates
   ```
   这个无 token，连接稳定，通常一次成功（会列出 4 个 survey_* 工具）。
 
@@ -108,7 +108,7 @@ API Token 和自定义 PATH 都要显式传。先用 `which npx uv` 找到绝对
     "mcpServers": {
       "sciverse-survey-gates": {
         "command": "/Users/<你>/.local/bin/uv",
-        "args": ["run", "--project", "/Users/<你>/sciverse-deep-research/mcp-server", "sciverse-survey-gates"]
+        "args": ["run", "--project", "<仓库根目录>/mcp-server", "sciverse-survey-gates"]
       }
     }
   }

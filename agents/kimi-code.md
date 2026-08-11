@@ -3,10 +3,10 @@
 ## Skill
 
 ```bash
-ln -s /Users/qzp/科研项目/sciverse-deep-research/skills/sciverse-deep-research ~/.kimi-code/skills/sciverse-deep-research
+ln -s <仓库根目录>/skills/sciverse-deep-research ~/.kimi-code/skills/sciverse-deep-research
 ```
 
-注意：Kimi Code 不支持嵌套 skill 目录（kimi-cli#1894），本 skill 已扁平化，直接可用。
+注意：`<仓库根目录>` 替换为你本机克隆仓库的绝对路径。Kimi Code 不支持嵌套 skill 目录（kimi-cli#1894），本 skill 已扁平化，直接可用。
 
 ## MCP
 

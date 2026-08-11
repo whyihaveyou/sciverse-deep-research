@@ -1,0 +1,131 @@
+# 机器学习势函数在晶格热导率预测中的应用进展
+
+## 摘要
+
+晶格热导率 $\kappa_L$ 的准确预测长期受困于精度与成本的二难：经典分子动力学（MD）与经验势失之精度，第一性原理声子玻尔兹曼输运方程（BTE）又与高阶非简谐性和大尺度相抵触。机器学习势函数（MLP）以近似第一性精度、近似经典成本的角色介入，为这一问题提供了第三条路。本综述按"MLP 在 $\kappa_L$ 计算中扮演的角色"建立分类框架，梳理三条技术路线——直接的描述符回归、以 MLP 为原子间势的动力学模拟、以及由 MLP 提取高阶力常数供 BTE 求解——并贯穿讨论一个核心争议：四声子散射到底多大程度上限制本征 $\kappa_L$。系统检索滚雪球 3 轮后收敛，入选 22 篇。分析表明：动力学路径天然捕获全阶非简谐性，在高导热半导体（BAs、GaN、金刚石）与无序体系（非晶硅、氧化石墨烯、合金）中显著缩小了理论与实验的长期差距，但代价是量子统计、长程作用与梯度外推等仍未闭合；直接回归路径则以可解释性与外推可靠性为代价换取高通量。结论给出各路线在精度、成本、适用范围上的有条件定位，并指出声子学专用的架构与基准、量子校正、以及欠序无序体系的可迁移势是下一步最有杠杆的方向。
+
+## 一、引言
+
+### 为什么需要这篇综述
+
+声子主导的热输运决定半导体散热、热电转换与热障涂层的性能下限。预测 $\kappa_L$ 的两条传统主路各自有硬约束：以经验势为驱动的 MD 数值便宜但精度随势函数质量起伏，长期困扰着对石墨烯、非晶硅等争议性体系的本征导热值判定；以密度泛函理论（DFT）为输入的谐波与非简谐力常数计算精确，但当声子散射必须推向三阶以上、当体系引入组分无序或真实缺陷时，其计算成本陡增甚至不可及。机器学习势函数（MLP）——神经网络势（NNP）、深度势（DeePMD）、矩张量势（MTP）、神经进化势（NEP）、图神经网络势（GNN）等——以训练自第一性数据的方式逼近 DFT 精度，以近似经验势的成本做动力学或力常数计算，正把这场博弈推向新的平衡点[1, 2]。
+
+已有的综述多聚焦"机器学习预测 $\kappa_L$"这一笼统话题[3]，把基于原子间势的动力学/力常数路线与纯描述符回归路线混为一谈，未区分它们各自的能力边界与物理含义。本文以"MLP 在 $\kappa_L$ 计算中扮演的角色"为主轴做 MECE 分类，把三种在物理上截然不同的用法分开评估，这是本文区别于已有综述的关键。
+
+### 研究问题
+
+RQ1：不同 MLP 路线（直接回归 / MD 原子间势 / 力常数 + BTE）在精度、成本、可扩展性与适用范围上分别占据什么位置？如何根据体系特征选择路线？
+
+RQ2：相较传统 DFT+BTE 与经验势 MD，MLP 在捕获高阶非简谐性（尤其四声子散射）与无序/合金体系上带来了哪些此前不可得的能力？
+
+RQ3：当前各路线共同面对的技术瓶颈与开放问题是什么？哪些设计能裁决最具争议的结论？
+
+### 本文组织方式
+
+第二节说明检索与纳入标准；第三节给出以"角色"为轴的分类框架；第四、五、六节分别考察直接回归、动力学、力常数 + BTE 三条路线；第七节做跨路线综合讨论，重点处理四声子散射这一跨切争议；第八节列出开放问题；第九节逐条回答引言提出的研究问题并给出结论。
+
+## 二、研究方法
+
+本次调研以 sciverse MCP 为信息源，先后用 `search_papers`（BM25 结构化检索）与 `semantic_search`（自然语言语义检索）执行 6 轮检索，覆盖 3 个视角：主流应用视角（"machine learning potentials lattice thermal conductivity"、"neural network potential anharmonic phonon thermal transport"）、方法论与基准视角（"machine-learned force field phonon Boltzmann transport equation"、"extracting anharmonic interatomic force constants from machine learning potentials"）、以及应用/学科视角（2D 材料与热电、地学与核材料的高压/合金体系）。时间窗口聚焦 2018-2026 年，以匹配该领域自 DeePMD-kit 发布以来快速演化的事实（对时效敏感，采用近十年加权）。对所有拟入选文献做存在性核验（以标题/第一作者/期刊/年份反查确认），存在性无法确认者一律排除。
+
+纳入标准：①研究对象为晶格热导率、声子输运或高阶非简谐性；②方法论上以机器学习势函数或机器学习模型为核心手段。三条路线均保证有充分数量的代表工作覆盖。以已入选文献为种子进行滚雪球（向后反查其引用的前置工作），滚雪球 3 轮后末轮新增 0 篇，达检索饱和。最终入选 22 篇，其中综述 2 篇、方法与基准 5 篇、直接回归 3 篇、动力学 4 篇、力常数 + BTE 3 篇、材料应用 5 篇。证据类型以第一性原理/MD 计算结果为主，辅以中子和声子散射实验对照；数值声明仅引用材料摘要或明确标注的来源，不凭记忆估计。
+
+| 证据类型 | 含义 | 可信度定位 |
+|---|---|---|
+| DFT/MD 计算值 | MLP 或 DFT 计算出的 $\kappa_L$ | 方法内自洽，个体值需实验对照 |
+| 实验测量 | 衍射/热反射等测得导热 | 判定理论值方向的基准 |
+| 基准/对比 | 多方法在同一体系上的并排评估 | 用于裁决方法间分歧，最高判别力 |
+
+## 三、分类框架
+
+"MLP 如何介入 $\kappa_L$ 预测"是本文的主分类轴。按 MLP 承担的计算角色，可将文献划分为三个互斥且完备的分支，外加一支横向的架构与工具：
+
+- **直接描述符回归**（分支一）：不显式求解原子间势或声子，把 $\kappa_L$ 作为物质描述符（化学组成、原型结构、弹性模量等）的回归目标，用传统 ML 或图神经网络拟合。
+- **MLP 作为原子间势的动力学模拟**（分支二）：把训练好的势嵌入平衡（GK/EMD）或非平衡（NEMD/HNEMD）分子动力学，在有限温度下采样，天然包含全阶非简谐性，直接得到 $\kappa_L$ 及声子谱信息。
+- **MLP 提取高阶力常数 + 声子 BTE**（分支三）：用 MLP 高效求取三阶乃至四阶力常数，供 phono3py/ShengBTE[4] 等求解线性化 BTE，可对声子散射做阶次分解与模式分辨。
+- **架构与工具**（横向）：DeePMD-kit 等软件生态，以及针对声子非谐性的横跨 GAP/ANN/GNN/MTP/NEP 的基准评估，为上面三支提供方法底座。
+
+这个分类轴的合法性在于：同一套原子间势既可以喂给 MD，也可以喂给力常数提取，但两条路线的物理产出与成本结构完全不同，混谈会掩盖"高阶非简谐性是 MD 天然内置、却是 BTE 需逐阶外推"这一关键分界。跨分支工作的存在（如以 MTP 同时做 BTE 力常数与 MD 验证[5, 6]）不挑战分类轴本身，反而是路线间衔接的证据。分类轴的空格（gap）：罕见有工作把"声子学专用"的归纳偏置（如显式三/四体力项、声子谱损失）编码进 MLP 架构，这正是后文开放问题的落点之一。
+
+## 四、分支一：直接的描述符回归
+
+直接回归路线放弃显式的原子间势或声子图像，把晶格热导率当作描述符空间里的回归靶。它追求的不是单点高精度，而是能以秒级吞吐覆盖成千上万候选结构的筛选能力。早期代表性工作在高通量 DFT 计算出的 120 个动力学稳定非金属化合物的 $\kappa_L$（跨 3 个数量级）之上，用随机森林（random forest）等算法建立描述符到 $\kappa_L$ 的映射，识别出最大声子频率、至 3 THz 的积分 Gruneisen 参数、平均原子质量与单胞体积等控制性描述符，并以首现未见的新化合物验证了模型的预测能力[7]。沿着同一思路，以原型结构与化学组成（无 DFT 弛豫结构参数）为特征的随机森林模型被用于预测乃至外推 $\kappa_L$ 的温度行为并向 Inorganic Crystal Structure Database 的大规模筛选[8]。
+
+描述符选择直接决定这类模型的物理解释性。早期工作依赖人工设计的声子相关描述符，数量有限但语义清晰；而 PINK 用晶体图卷积神经网络（CGCNN）自动从 CIF 提取体模量、剪切模量等中间量，再回代简化的 Slack 物理公式计算 $\kappa_L$，在 377,221 个稳定材料上做了高通量筛选并锁定 Ag3Te4W 与 Ag3Te4Ta 等超低导热候选[9]。这一"数据表示 + 物理公式"的混合设计，在可解释性与吞吐之间取了一个折中，相比纯黑箱回归更便于定位失效来源——但也说明直接回归的精度天花板受制于底层物理近似（此处即 Slack 模型），而非仅仅受制于模型容量。
+
+直接回归的核心代价是可迁移性与外推可靠性。多位作者意识到，当测试集与训练集的描述符分布不同时，模型的外推误差会急剧放大，这是此类方法迁移到新材料空间时的系统性风险[8, 9]。与之相对，基于原子间势的路线把"物理"内建在力场上，天然具备更好的物理上封闭的外推语义。因此直接回归适用的场景是高通量首筛与候选排序，而不是对具体材料 $\kappa_L$ 的终值认定——后者本文后续讨论的动力学与力常数路线更有发言权。
+
+## 五、分支二：MLP 作为原子间势的动力学模拟
+
+把训练好的 MLP 嵌进分子动力学、在有限温度下采样，是最能体现"全阶非简谐性内建"的路线。平衡 MD 通过热流自相关函数（Green-Kubo）直接积分出 $\kappa_L$，非平衡及其均匀变体（NEMD/HNEMD）通过外加驱动获得稳态热流。由于不对手势做截断，MD 隐式覆盖了三阶、四阶乃至更高阶的声子散射，这是相对 BTE 的天然优势，也是该路线在地核合金、核材料、强无序体系等场景被频繁采用的原因。
+
+### 5.1 高导热半导体的高阶非简谐性
+
+以立方砷化硼（BAs）与金刚石为原型，Ouyang 等的核心发现具有方法级意义：基于矩阵张量算法训练的 MLP，其声子谱能量密度分析能同时捕获声子模软化与线宽展宽；在仅考虑三声子散射的 BTE 框架下，MLP 预测的 $\kappa_L$ 与 DFT 精度相当，但 BAs 的 $\kappa_L$ 被显著高估（相比实验），而四声子散射恰是回收这一偏差的关键；相反地，MLP+平衡 MD 因其全阶内建，能同时与 BAs 和金刚石的实验值一致[10]。这直接点明：**在高非谐材料中，声子散射的阶次本身才是反控制变量**。砷化硼的多项后续工作沿同一逻辑强化了这一结论：对立方 BAs 与纤锌矿 BAs，四声子散射分别将室温 $\kappa_L$ 从约 1300 W/m·K 的立方值压低、将纤锌矿 $a$-$b$ 面的约 1036 W/m·K 压低约 43%，从而与实验闭合[5, 6]。对 GaN，结合非弹性中子散射与含温度效应的 MLP 计算表明，四声子过程在高温抑制 $\kappa_L$ 约 20% 并削弱各向异性，其强度来自 20-30 meV 区间被三声子选择定则高度限制的大散射通道[11]。二维体系中，单层 InSe 的 Green-Kubo 深度势（GK-DP）计算亦表明，仅含三声子的 BTE 会因低估下光学支的散射相位空间而过估其 $\kappa_L$，而含全阶非简谐的 GK-DP 结果与实验一致，再次把四声子推到解释与实验差异的关键位置[12]。
+
+### 5.2 无序体系与合金
+
+动力学+MLP 的能力在大尺度无序体系上体现得最充分。非晶硅（a-Si）是检验 MLP 可扩展性的试金石：NEP 势驱动的 MD 需要扩到 64,000 原子、淬火率低至 $10^{11}$ K/s 才接近收敛，配合基于谱的热导拆分做量子校正后，其温度依赖与厚度依赖从 10 K 到室温与实验一致——同时暴露了 MD 路径的量子统计局限性，经典核运动在低温与高量子数体系会低估热导，必须借助谱分解的量子校正才能弥合[13]。在核材料方向，MLP 对锆基合金（纯 Zr、Zr-Sn、Zr-Nb）的晶格热导率预测显示，Sn/Nb 掺杂通过降低声子群速度并增大声子-声子散射率而显著压低 $\kappa_L$，为裂变包壳材料的导热调控提供了成分依赖的定量依据[14]。在金属体系，统一神经进化势 UNEP-v1 结合均匀非平衡 MD（HNEMD）对 16 种元素金属的声子热导与仅含声子-声子散射的 BTE 结果吻合良好，而同势框架下传统嵌入原子法（EAM）势的一致性明显更差，凸显了第一性精度势在高熵合金等复杂体系上的潜力[15]。组分与缺陷的统计无序也是该路线的优势区：氧化石墨烯热还原过程的 NEP 动力学模拟表明，热还原后的 $\kappa_L$ 被强烈抑制到几到几十 W/m·K，并随 O/C 比与 OH/O 比呈非单调变化，这一"结构-导热"定量关联此前难以从经典势或单点 DFT 获得[16]；应变工程的硼烯研究则展示 MLP+MD 如何解析三声子与四声子散射在应变下的竞争，从而解释 $\kappa_L$ 的非单调应变依赖[17]。在 2D 高导热的另一端，MLIP 结合 BTE 对 MoSi2N4 家族的一阶原理评估预测出 440-500 W/m·K 量级的高本征 $\kappa_L$，与石墨烯量级的二维导热材料同列，展示了同一套势方法在二维高通量物性预测上的延展[18]。上述工作表明，MLP 动力学把此前只能定性描述的"无序、缺陷、组分"问题推进到了可量化预测的层面。
+
+### 5.3 优势与代价的边界
+
+对比而言，动力学路线的优势是无须假设散射阶次、天然容纳无序；代价有三。一是统计采样成本仍高于 BTE 力常数路线，尤其对低 $\kappa_L$、长声子平均自由程体系需要更大体系与更长关联时间才能收敛（a-Si 即为一例[13]）。二是量子统计局限，低温或简谐性较弱的高频模会被经典处理高估其导热贡献，需要谱分解 + 量子校正这种工程化补救。三是势的迁移范围受限于训练数据覆盖的化学与结构相空间，跨相、跨组成或含稀缺陷的构型可能落在训练分布之外，而此时 MD 会给出看似平滑实则错误的数值——这正是需要基准与不确定性量化衔接的环节（见第七、八节）。
+
+## 六、分支三：MLP 提取高阶力常数 + 声子 BTE
+
+第三条路线把 MLP 当作高效的力常数求值器，而非动力学轨道生成器。其范式可追溯至"用短程 AIMD 轨迹训练 MTP，再由 MTP 求取三阶力常数并馈给 ShengBTE 迭代求解 BTE"的里程碑式工作，该方法在多种体相与二维材料上复现了全 DFT 的 $\kappa_L$，而把求取非简谐力常数的 DFT 瓶颈替换为近乎免费的势函数求值[4]。这一"力常数 + BTE"范式随后被系统化为高通量工作流：Togo 与 Seko 将多项式 MLP 在线训练（on-the-fly）集成进第一性原理 $\kappa_L$ 计算管线，一次跑完 103 个纤锌矿/闪锌矿/岩盐型化合物的 LTC，在显著降低计算需求的同时演示了规模化可行性[19]。与直接回归不同的是，（BTE 路线的产出是声子层面的、可物理分解的）——散射阶次、模式分辨、相位空间大小等都有明确含义，也因此自然承接了对四声子散射的定量研究。
+
+四声子散射是这条路线内部最活跃的争议点。在高非谐的 As 基与金刚石类体系上，加入四声子后 $\kappa_L$ 的显著下降已被多方报告一致支持[10, 5, 11, 6]。然而，当 Kocabaş 等人以收敛充分的 GAP、MACE、NEP、HIPHIVE 多种现代势，结合均匀 NEMD 对二维 MoS2 与 MoSe2 做系统评估时，却发现充分收敛的四声子过程对两材料本征 $\kappa_L$ 的贡献可忽略，与若干先前声称四声子重要的结论相悖；他们把分歧归因于先前工作未收敛的截断、方法选择与对高阶过程处理的不一致[20]。由此，四声子的重要性并非普适常量，而是强依赖材料声子谱的结构、能隙与截断通道；对四声子对 $\kappa_L$ 的影响，不能以"必显著"或"可忽略"一言蔽之，必须逐材料并确保数值收敛。这一争议同时凸显了 MLP 基准的可重复性风险——结论可以随势的选择与收敛标准而漂移，因此分体系建立的、含收敛性检验的基准库是必要的（见第八节）。
+
+力常数 + BTE 路线与动力学路线是互补而非互斥：BTE 提供阶次分解与模式分辨的物理解释力，代价是必须显式决定取舍散射阶次并承担四声子力常数的计算代价；动力学内置高阶则无须此决定，代价是对机制的解释力较弱。多篇工作已在同一势上并用两条路线互相校验[10, 6]，显示出二者合流是当前稳健实践的趋势。
+
+## 七、综合讨论
+
+综合三条路线，可以提炼出三个跨切的判断。第一，**MLP 的核心价值不是更高的单点精度，而是把"全阶非简谐 + 大尺度无序"从不可解推进为可解**。传统 DFT+BTE 在把散射阶次推到四声子上成本陡增、在缺陷与组分无序上尤甚；MLP 以近经典成本把这些问题重开，这在 a-Si 的 64,000 原子收敛、16 种金属的统一势、地核 Fe-Si 合金的高压条件下体现得最为直接[13, 15, 21]。第二，**路线的选择应当由体系的主导散射物理决定，而非由模型的流行度决定**：高谐的晶体（金刚石、部分岩盐型）BTE 力常数路线即可胜任且更具解释力；强非谐体系（BAs、GaN、纤锌矿）与无序/合金则需要动力学路线或"力常数+四声子"以回收高估偏差[10, 20]。第三，**基准的可重复性与收敛性是当前方法学上最被低估的变量**：对同一体系，势的选择、截断的收敛、四声子是否计入，都能翻转结论（Kocabaş 2025 对 MoS2/MoSe2 的再评估即为例证），这与早期直接回归工作的外推风险共同指向一个事实——MLP 在 $\kappa_L$ 上的结论强度已经被证明强烈依赖方法与收敛设定，若不把收敛性与不确定性量化写进通行实践，跨工作的横向比较将失去意义[20, 8]。
+
+## 八、开放问题与未来方向
+
+四声子散射的重要性逐材料而变，当前缺乏一个可迁移的判据在开工前判定"该体系是否需要四声子"。一个可检验的假设是从声子谱结构（能隙位置、三声子相位空间饱和度、库仑/长程通道）预测四声子在 $\kappa_L$ 上贡献的分量。构造一批"四声子无关体系"并横截面测量各势在统一收敛标准下的行为，能裁决这一判据是否成立——现有入选文献中，仅有 MoS2/MoSe2 系统做过跨势收敛评估[20]，而这正是最高杠杆的下一步。
+
+其次，**声子学专用的架构与归纳偏置仍是空白**。多数的 MLP 设计以能量-力-应力为训练目标，未针对声子物理编码偏置；现有基准显示 ANN 与 GNN 可高至五阶复现非谐哈密顿量，但对截断、长程与范德华/偶极相互作用的处理仍依赖通用势的表达能力而非结构化的先验[22]。把声子谱损失、显式极化和长程项纳入 MLP 训练，可能显著改善弱键与极性体系（如热障涂层、离子晶体）的 $\kappa_L$ 预测，这一方向当前几乎未被系统探索。
+
+第三，**量子校正与相空间覆盖仍需工程化**：经典 MD 在低温与简谐高频模上的系统偏差已被 a-Si 工作以谱分解法部分矫正[13]，但该方法依赖材料、难以通用；发展第一性的、可迁移的量子统计修正，或直接在势中编码核量子效应，是让动力学路线在低温热导问题上可信的前提。
+
+第四，**直接回归与物理势的量产通道尚未打通**。直接回归很快但外推不可靠，物理势可靠但每次与具体材料绑定、成本高。打通"直接回归大范围初筛 ⊕ 物理势精选复核 ⊕ 实验验证"的闭环，并把不确定性与收敛性报告制度化，是让三个方法分支协同产生实际材料设计价值的关键设计。
+
+## 九、结论
+
+对照引言提出的三个研究问题：
+
+RQ1（三条路线在精度/成本/适用性上的定位）：直接回归路线最快但受制于描述符外推，适用于高通量首筛与候选排序；动力学路线天然内建全阶非简谐并容纳无序，但采样与收敛成本最高、需量子校正，适用于强非谐、无序、合金与高压体系；力常数 + BTE 路线提供阶次分解与模式分辨的解释力，但必须显式决定散射阶次并承担四声子力常数计算，适用于谐性中等、需要物理解释的晶体。物理规律是：体系的非谐性越强、无序度越高，越应当倾向 MD/动力学路线；反之 BTE 路线足够且更省[10, 20, 4]。
+
+RQ2（相较传统方法的新能力）：MLP 提供了两样此前不可兼得的能力——以近经典成本覆盖高阶非简谐性，以及把组分无序、缺陷与特征尺度放大到可收敛的新规模。前者在 BAs、GaN、金刚石的 $\kappa_L$ 与实验闭合上得到体现[10, 11, 5]；后者在非晶硅、金属统一势、地核合金与氧化石墨烯的定量预测中得到体现[13, 15, 21, 16]。
+
+RQ3（瓶颈与开放问题）：最主要的瓶颈是收敛性与外推可靠性的标准化缺失——同一体系因势与收敛设定不同可得到相悖结论，四声子显著性与否即随材料与设定漂移[20]；其次是量子统计校正、长程与弱键相互作用的表达、以及"初筛-复核-验证"闭环的制度化。最值得投入的设计是声子学专用的 MLP 架构与分体系基准库，前者从归纳偏置上解决声子物理，后者从可重复性上裁决方法间分歧。
+
+总体而言，机器学习势函数已经改变晶格热导率的计算生态：它把曾经在"精度"与"可及性"之间不可调和的矛盾，转化成一套可以按体系与非谐性强度理性选择的工具谱系。下一步的突破将不再来自单一模型，而来自把架构偏置、量子校正与可重复基准这三块拼图补齐后形成的、可迁移的声子输运计算范式。
+
+## 参考文献
+
+[1] Saeed Arabha, Zahra Shokri Aghbolagh, Khashayar Ghorbani, S. Milad Hatam-Lee, Ali Rajabpour, “Recent advances in lattice thermal conductivity calculation using machine-learning interatomic potentials,” Journal of Applied Physics, 2021.
+[2] Han Wang, Linfeng Zhang, Jiequn Han, Weinan E, “DeePMD-kit: A deep learning package for many-body potential energy representation and molecular dynamics,” Computer Physics Communications, 2018.
+[3] Yufeng Luo, Mengke Li, Hongmei Yuan, Huijun Liu, Ying Fang, “Predicting lattice thermal conductivity via machine learning: a mini review,” npj Computational Materials, 2023.
+[4] Bohayra Mortazavi, Evgeny V. Podryabinkin, Ivan S. Novikov, Timon Rabczuk, Xiaoying Zhuang, Alexander V. Shapeev, “Accelerating first-principles estimation of thermal conductivity by machine-learning interatomic potentials: a MTP/ShengBTE solution,” Computer Physics Communications, 2020.
+[5] Zhichao Liu, Xiaolong Yang, Bo Zhang, Wu Li, “High Thermal Conductivity of Wurtzite Boron Arsenide Predicted by Including Four-Phonon Scattering with Machine Learning Potential,” ACS Applied Materials & Interfaces, 2021.
+[6] Lingyun Dai, Man Li, Yongjie Hu, “Machine learning for thermal transport and phonon high-order anharmonicity in high thermal conductivity materials: A case study in boron arsenide,” Physical Review Materials, 2025.
+[7] Rinkle Juneja, George Yumnam, Swanti Satsangi, Abhishek K. Singh, “Coupling the High-Throughput Property Map to Machine Learning for Predicting Lattice Thermal Conductivity,” Chemistry of Materials, 2019.
+[8] Russlan Jaafreh, Yoo Seong Kang, Kotiba Hamad, “Lattice Thermal Conductivity: An Accelerated Discovery Guided by Machine Learning,” ACS Applied Materials & Interfaces, 2021.
+[9] Yujie Liu, Xiaoying Wang, Yuzhou Hao, Xuejie Li, Jun Sun, Turab Lookman, Xiangdong Ding, Zhibin Gao, “PINK: physical-informed machine learning for lattice thermal conductivity,” Journal of Materials Informatics, 2025.
+[10] Yulou Ouyang, Cuiqian Yu, Jia He, Pengfei Jiang, Weijun Ren, Jie Chen, “Accurate description of high-order phonon anharmonicity and lattice thermal conductivity from molecular dynamics simulations with machine learning potential,” Physical Review B, 2022.
+[11] Bin Wei, Yongheng Li, Li Wang, Kai Wang, Qiyang Sun, Xiaolong Yang, D. L. Abernathy, Qilong Gao, Chen Li, Jiawang Hong, Yuanhua Lin, “High-order phonon anharmonicity and thermal conductivity in GaN,” Physical Review B, 2024.
+[12] Jinsen Han, Qiyu Zeng, Ke Chen, Xiaoxiang Yu, Jiayu Dai, “Lattice Thermal Conductivity of Monolayer InSe Calculated by Machine Learning Potential,” Nanomaterials, 2023.
+[13] Yanzhou Wang, Zheyong Fan, Ping Qian, Miguel A. Caro, Tapio Ala-Nissilä, “Quantum-corrected thickness-dependent thermal conductivity in amorphous silicon predicted by machine learning molecular dynamics simulations,” Physical Review B, 2023.
+[14] Fan Yang, Di Wang, Jiaxuan Si, Jianqiao Yu, Zhen Xie, Xiaoyong Wu, Y.X. Wang, “Accelerated prediction of lattice thermal conductivity of Zirconium and its alloys: A machine learning potential method,” Journal of Nuclear Materials, 2024.
+[15] Shuo Cao, Ao Wang, Zheyong Fan, Hua Bao, Ping Qian, Ye Su, Yu Yan, “Lattice thermal conductivity of 16 elemental metals from molecular dynamics simulations with a unified neuroevolution potential,” Journal of Applied Physics, 2025.
+[16] Bohan Zhang, Biyuan Liu, Penghua Ying, Zherui Chen, Yanzhou Wang, Yonglin Zhang, Haikuan Dong, Jinglei Yang, Zheyong Fan, “Thermal conductivities of monolayer graphene oxide from machine learning molecular dynamics simulations,” Journal of Chemical Physics, 2026.
+[17] Jia He, Cuiqian Yu, Shuang Lü, Shuyue Shan, Zhongwei Zhang, Jie Chen, “Complex role of strain engineering of lattice thermal conductivity in hydrogenated graphene-like borophene induced by high-order phonon anharmonicity,” Nanotechnology, 2023.
+[18] Brahmanandam Javvaji, Bohayra Mortazavi, Timon Rabczuk, Xiaoying Zhuang, “Exceptional piezoelectricity, high thermal conductivity and stiffness and promising photocatalysis in two-dimensional MoSi2N4 family confirmed by first-principles,” Nano Energy, 2020.
+[19] Atsushi Togo, Atsuto Seko, “On-the-fly training of polynomial machine learning potentials in computing lattice thermal conductivity,” Journal of Chemical Physics, 2024.
+[20] Tuğbey Kocabaş, Murat Keçeli, Tanju Gürel, M. V. Milošević, Cem Sevik, “Thermal conductivity limits of MoS2 and MoSe2: Revisiting high-order anharmonic lattice dynamics with machine learning potentials,” Applied Physics Reviews, 2025.
+[21] Yuan Yin, Cong Liu, Shuangmeng Zhai, Yun Liu, Yingwei Fei, “Lattice Thermal Conductivity of hcp Fe-Si Alloys Determined by Machine Learning Potentials,” Geophysical Research Letters, 2025.
+[22] Sasaank Bandi, Chao Jiang, Chris A. Marianetti, “Benchmarking machine learning interatomic potentials via phonon anharmonicity,” Machine Learning: Science and Technology, 2024.

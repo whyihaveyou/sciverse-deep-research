@@ -20,6 +20,7 @@ description: 对一个学术研究话题进行深度文献调研，产出结构�
   - **返回字段注意**：`search_papers` 默认只返回 unique_id / doc_id / title / author / abstract / 期刊名 / 发表年份——卷、期、页码、DOI、被引数、期刊等级等题录字段**不在默认返回里**。凡要打印这些字段，一律经"题录核验环节"从权威源解析获取，禁止从记忆填写。
 - 网页检索与网页抓取工具（按宿主环境，如 WebSearch/WebFetch/web.run/FetchURL）：**不得作为学术观点或研究发现的来源**，但它是**题录字段与期刊等级核验的指定通道**（出版商页面、期刊官网、知网/万方、CSSCI 与 AJG 目录等），也用于访问 Crossref API（`api.crossref.org`）等题录权威源。
 - `scripts/citation_ledger.py`（引用台账：validate / compile / renumber / csv）、`scripts/check_report.py`（交付前 lint）、`scripts/verify_citations.py`（Crossref 题录批量核验）——三脚本是本 skill 的确定性机器，有代码执行环境时优先使用。
+- **脚本 vs 门禁 MCP 的优先级**：宿主有代码执行环境（shell/Bash）时，`scripts/*.py` 是**主路径**；`sciverse-survey-gates` MCP（`survey_ledger_validate` / `survey_compile` / `survey_check` / `survey_verify_citations`）是同一套判定的 MCP 封装，供无 Python 执行环境的宿主作兜底，或作双保险——两者结果等价，走任一路径即满足门禁要求，不必重复执行。
 
 **路径约定**：本 skill 全部文档中出现的文件路径，一律相对于 skill 根目录（`sciverse-deep-research/`）书写；在任何工作目录下读取这些文件时，请从根目录拼接路径。
 

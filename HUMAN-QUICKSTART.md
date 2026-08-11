@@ -75,7 +75,7 @@ Agent 会自己跑完整管线：
 | `agents/*.md`（7 个） | Agent | 各框架（Hermes/Claude/Codex/Kimi/OpenCode…）专属配置路径 |
 | `SKILL.md` | Agent（运行时） | 完整调研流程指令（Step0→检索→铸台账→综合→门禁交付） |
 | `HANDOFF.md` | 开发者 | 开发交接：进度 / 已完成 / 待办 / 怎么安全继续 |
-| `tests/run_regression.py` | 开发者 | 回归门禁（改代码前跑，21/21 全绿是底线） |
+| `tests/run_regression.py` | 开发者 | 回归门禁（改代码前跑，27/27 全绿是底线） |
 
 ## 一句话总结
 

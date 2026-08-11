@@ -19,7 +19,7 @@ Hermes / Qwen Code / OpenCode）获得**学术深度文献调研**能力——�
 
 - 本地路径：**`/Users/qzp/科研项目/sciverse-deep-research/`**
 - GitHub 远端：`https://github.com/whyihaveyou/sciverse-deep-research.git`（public）
-- 当前分支 / HEAD：`main` @ `c9cc18e`（本地=origin，工作树干净）
+- 当前分支 / HEAD：`main` @ `1708464`（本地=origin，2026-08-11 已脱离 detached HEAD 并快进归位；工作树的 `.kimi/`、`.scratch/` 等未跟踪项是工作产物，属正常）
 - 最近 10 个 commit 即最新成果史（见 `git log --oneline`）；完整提交史已 push
 
 ⚠️ **路径注意**：项目曾位于 `~/sciverse-deep-research`，已迁移到
@@ -134,7 +134,7 @@ Hermes / Qwen Code / OpenCode）获得**学术深度文献调研**能力——�
 - 若不联网：按子代理报告 + 本地 2.0 的 `.agent/skills/` 生态白箱对比即可
 
 ### P2 — 其他
-- AGENT-BOOTSTRAP 的"Hermes 用命令配置"示例里路径已是新路径（已修）；但若用户重装/新机器，跑 install.sh 即可
+- ~~AGENT-BOOTSTRAP 的"Hermes 用命令配置"示例里路径已是新路径（已修）~~ **已办（2026-08-11）**：面向读者的文档（README / AGENT-BOOTSTRAP / agents/*）仓库路径已统一为 `<仓库根目录>` 占位符；HUMAN-QUICKSTART 的回归条数已更新为实际值 27/27。若用户重装/新机器，跑 install.sh 即可
 - 可考虑把 Kimi 端到端测试的具体命令补进 `agents/kimi-code.md` 作为验证记录（未做）
 - `fetch_sources.py` 的 OpenAlex 曾遇 429 限流（共享 IP），重试即可；脚本错误处理正确
 
@@ -176,4 +176,4 @@ Hermes / Qwen Code / OpenCode）获得**学术深度文献调研**能力——�
 
 ---
 
-*交接基准：`c9cc18e` on `main`，工作树干净。写于 2026-08-07。*
+*交接基准：`1708464` on `main`（本地=origin，2026-08-11 已归位）。原文写于 2026-08-07（基准 `c9cc18e`），基线刷新于 2026-08-11。*

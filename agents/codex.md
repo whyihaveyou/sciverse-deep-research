@@ -5,8 +5,10 @@
 Codex 原生支持 SKILL.md（`~/.codex/skills/`，`$skill` 调用）：
 
 ```bash
-ln -s /Users/qzp/科研项目/sciverse-deep-research/skills/sciverse-deep-research ~/.codex/skills/sciverse-deep-research
+ln -s <仓库根目录>/skills/sciverse-deep-research ~/.codex/skills/sciverse-deep-research
 ```
+
+（`<仓库根目录>` 替换为你本机克隆仓库的绝对路径，下同。）
 
 ## MCP
 
@@ -22,7 +24,7 @@ SCIVERSE_API_TOKEN = "<你的token>"
 
 [mcp_servers.sciverse-survey-gates]
 command = "/Users/<you>/.local/bin/uv"
-args = ["run", "--project", "/Users/<you>/sciverse-deep-research/mcp-server", "sciverse-survey-gates"]
+args = ["run", "--project", "<仓库根目录>/mcp-server", "sciverse-survey-gates"]
 ```
 
 ## 备注

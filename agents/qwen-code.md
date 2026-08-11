@@ -3,10 +3,10 @@
 ## Skill
 
 ```bash
-ln -s /Users/qzp/科研项目/sciverse-deep-research/skills/sciverse-deep-research ~/.agents/skills/sciverse-deep-research
+ln -s <仓库根目录>/skills/sciverse-deep-research ~/.agents/skills/sciverse-deep-research
 ```
 
-（Qwen Code 读取 `~/.agents/skills`；如你的版本用 `~/.qwen/skills`，链接到对应目录即可。）
+（`<仓库根目录>` 替换为你本机克隆仓库的绝对路径，下同。Qwen Code 读取 `~/.agents/skills`；如你的版本用 `~/.qwen/skills`，链接到对应目录即可。）
 
 ## MCP
 
@@ -22,7 +22,7 @@ ln -s /Users/qzp/科研项目/sciverse-deep-research/skills/sciverse-deep-resear
     },
     "sciverse-survey-gates": {
       "command": "/Users/<you>/.local/bin/uv",
-      "args": ["run", "--project", "/Users/<you>/sciverse-deep-research/mcp-server", "sciverse-survey-gates"]
+      "args": ["run", "--project", "<仓库根目录>/mcp-server", "sciverse-survey-gates"]
     }
   }
 }
