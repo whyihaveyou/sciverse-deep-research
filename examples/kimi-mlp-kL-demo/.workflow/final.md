@@ -1,0 +1,145 @@
+# 机器学习势函数在晶格热导率预测中的应用进展：从"替代 DFT 算力常数"到"使能超越微扰论的热输运模拟"
+
+## 摘要
+
+晶格热导率 $\kappa$ 的第一性原理预测长期受制于两个瓶颈：非谐力常数评估的高昂成本，以及微扰论框架在强非谐体系中的失效。本文基于 sciverse 学术检索系统调研了 2019–2026 年间机器学习势函数（MLIP）应用于晶格热导率计算的 25 篇代表性文献，按"力常数—BTE 路线"与"分子动力学路线"两条技术主线组织证据，并单独考察强非谐体系与通用模型前沿。核心发现有三：其一，MLIP 在两条路线上均已达到与 DFT 相当的精度，但精度—效率收益高度依赖训练集构造协议，且"力误差小"并不自动保证 $\kappa$ 准确——分子动力学路线存在由拟合残差驱动的系统性低估，而力常数路线对此显著不敏感；其二，BTE 与 MD 两条路线的分歧主要由非谐强度调节，在超越 Ioffe–Regel 极限的体系中 Green–Kubo 框架成为必需而非可选；其三，领域正在从"单材料专用势"转向"基础模型 + 物理感知微调"，但零样本通用势的热导预测尚未达到第一性原理精度。本文给出各流派的适用条件判定与若干可检验的开放问题。
+
+## 一、引言
+
+### 为什么需要这篇综述
+
+晶格热导率是热电转换、热管理与热障涂层设计的核心参数。基于密度泛函理论（DFT）的声子玻尔兹曼输运方程（BTE）求解已成为预测 $\kappa$ 的标准框架，但三阶及以上力常数的评估成本将应用范围限制在高对称、小原胞体系；更早的系统性检验表明，传统经验势即使在硅这样的基准材料上也无法给出与实验满意吻合的 $\kappa$ [1]。2019 年以来，机器学习势函数以"接近 DFT 的精度、接近经典势的成本"进入该领域，相关应用已积累到需要梳理的程度。已有综述分别覆盖了 MLIP 计算热导的总体进展 [2] 与 MLIP 驱动分子动力学热输运模拟的方法教程 [3]，但两个较早的节点均未覆盖 2024 年之后的三股新动向：力误差对热导预测系统性偏差的定量揭示、基础模型（foundation model）在热输运任务上的基准检验，以及超越微扰论的 Green–Kubo 路线在强非谐体系中的复兴。本文以"技术路线 × 适用条件"为角度切入，回答的不仅是"哪些工作做了什么"，更是"什么条件下该信哪条路线"。
+
+### 研究问题
+
+- RQ1：在力常数—BTE 与分子动力学两条技术路线上，MLIP 相对 DFT 的精度—效率权衡各达到什么水平，关键依赖条件是什么？
+- RQ2：不同 MLIP 架构（GAP、MTP、HDNNP、NEP、DP、等变图神经网络等）在热导任务上的能力边界与已知失效模式是什么？
+- RQ3：当前尚未解决的核心挑战——高阶非谐、强非谐体系、核量子效应与模型可迁移性——处于什么状态？
+
+### 本文组织方式
+
+第二节说明检索与纳入方法；第三节给出分类框架；第四至七节分别综合力常数—BTE 路线、分子动力学路线、强非谐体系、通用模型前沿四个分支；第八节做跨分支综合讨论，重点裁决路线分歧与精度判据争议；第九节列出具体开放问题；第十节逐条回答 RQ。
+
+## 二、研究方法
+
+本综述以 sciverse 学术检索系统为唯一文献来源，使用 `search_papers`（BM25 关键词 + 结构化过滤）、`semantic_search`（自然语言切片检索）与 `list_paper_relations`（引用网络滚雪球）三类工具。检索围绕五个视角展开：主流方法视角（"machine learning interatomic potential lattice thermal conductivity"）、方法流派视角（GAP / MTP / NEP / HDNNP / deep potential / 等变 GNN 各自与 thermal conductivity 组合）、方法论与批判视角（力误差、基准检验、收敛性争议）、物理机制视角（四声子散射、强非谐、Green–Kubo）、前沿时效视角（基础模型、统一势，2025 年起的新工作，以 STRONG 档时效加权探针检索）。检索日期 2026-08-11；时间窗口按"前沿方法"档（重点覆盖 2019 年 MLIP 热导应用兴起以来，含 2025–2026 年最新工作）与"奠基背景"档（经验势局限与四声子散射两篇背景文献不限年份）混合执行。
+
+纳入标准：研究对象为晶态（或对照性非晶）材料的晶格热导率；MLIP 在计算链条中承担实质性角色（提供力常数或驱动动力学），纯性质回归式的高通量筛选工作（如图网络直接回归 $\kappa$）不纳入；存在性经检索工具确认的期刊论文或正式预印本。滚雪球以 Korotaev 2019 [4] 与 Srivastava–Jain 2024 [5] 为种子做前向引用反查，末轮定向补搜零新增入选，各子方向文献均不少于 3 篇，判定检索饱和。最终纳入 25 篇（等于参考文献条目数）。
+
+| 证据类型 | 含义 | 可信度定位 |
+|---|---|---|
+| 单材料验证研究 | 一种 MLIP 在一个原型体系上与 DFT/实验对比 | 证明可行性，外推需谨慎 |
+| 多材料基准研究 | 跨数十至数百种材料的系统检验 | 支撑条件化结论的主力 |
+| 方法学研究 | 热流公式、力误差修正、微调协议 | 决定结果的系统性偏差方向 |
+| 综述与教程 | 领域阶段性总结 | 用于定位脉络，不作一手证据 |
+
+## 三、分类框架
+
+本文按"MLIP 在热导计算链条中的角色"这一单轴分类，得到四个互斥且完备的分支：
+
+| 分支 | MLIP 的角色 | 输运理论 | 典型适用场景 |
+|---|---|---|---|
+| A. 力常数—BTE 路线 | 替代 DFT 评估二阶/高阶力常数 | 微扰论 + 声子 BTE | 弱—中等非谐晶体、高通量筛选 |
+| B. 分子动力学路线 | 驱动大尺度、长时间动力学 | Green–Kubo / NEMD / HNEMD（全阶非谐） | 非晶、缺陷、界面、相变体系 |
+| C. 强非谐体系 | 使能超越微扰论的计算 | Green–Kubo 或含重整化的统一理论 | 接近 Ioffe–Regel 极限的超低 $\kappa$ 材料 |
+| D. 通用模型前沿 | 免训练或少训练直接预测 | 上述任一种 | 跨化学空间的快速筛查 |
+
+分类轴上的一个空格值得注意：**分支 A 与分支 B 的交叉格——"用同一 MLIP 同时跑两条路线并系统比对偏差"——直到 2024 年才有工作正式填充**（见第八节），此前两条路线各自验证、互不质询。跨分类的工作（Korotaev 2019 [4] 同时求解 BTE 与 Green–Kubo；Cao 等 2025 [6] 用统一势跑 HNEMD 并对照 BTE）正是判断框架边界的关键证据。
+
+## 四、力常数—BTE 路线：从单点验证到高通量协议
+
+该分支回答 RQ1 的一半：MLIP 替代 DFT 提供非谐力常数，把 BTE 框架的成本瓶颈从"量子力学计算数量"转移到"训练集构造"。
+
+2019 年的两组独立工作几乎同时确立了可行性。Minamitani 等用高维神经网络势（HDNNP）在力训练误差低于 40 meV/Å 时，使硅在 200–500 K 的热导率与 DFT 偏差小于 1%、GaN 在 200–1000 K 偏差小于 5.4% [7]；Korotaev 等则用矩张量势（MTP）配合主动学习，仅以数百次量子力学计算训练出可复现 CoSb$_3$ 振动谱与热导率的势函数，并罕见地在同一体系上让 BTE 与 Green–Kubo 两种方法互相印证 [4]。这两项工作奠定了该路线的两个范式要素——力误差阈值与主动学习采样——但也留下了一个后来被证明关键的隐患：力误差达标是否足以保证高阶导数准确？
+
+后续工作沿"检验标准"与"适用范围"两个方向推进。Zhang 等以 GAP 计算 h-BN 单层热导率时发现，约 30% 的代表性构型即可构造出足够准确的势，并且**高阶力常数比谐和近似下的声子谱是更可靠的 MLIP 质量判据** [8]——这直接回应了上述隐患。Liu 等将 MTP 用于提取纤锌矿 BAs 的四阶力常数，在包含四声子散射后给出室温热导率 1036 W/(m·K)，较仅考虑三声子时下降 43% [9]，把 2017 年确立的四声子重要性结论 [10] 首次落到 MLIP 加速的计算流程中。
+
+适用范围的代表性扩展来自两项多材料研究。Choi 等在 25 种对称性与热导率跨度达四个量级（$10^{-1}$ 到 $10^{3}$ W/(m·K)）的材料上系统比较训练集协议，发现 50–700 K 的分子动力学轨迹是最稳健的训练集选择，此时神经网络势结果与 DFT 全面持平，且计算成本在材料间均匀、获得 2–10 倍加速（缩减训练集时可达约 50 倍）[11]。Srivastava 与 Jain 则走了另一条加速路径——不训练完整势函数，而是用机器学习局部学习势能面、直接抽取非谐力常数，在 220 种三元材料上把力常数评估从 48 万 CPU 小时压到 1.2 万以内，同时保持热导率预测误差在 10% 以内 [5]。两项工作对比可见该路线的两种成本工程哲学：前者摊薄"每种材料的训练成本"，后者直接砍掉"训练"环节本身；前者换来的是可复用的完整势，后者换来的只是力常数。
+
+**表 1：力常数—BTE 路线的代表性工作——精度均已达到 DFT 水平，差异在于成本工程策略与检验严格度**
+
+| 工作 | MLIP | 体系 | 精度声明 | 成本策略 |
+|---|---|---|---|---|
+| Minamitani 2019 [7] | HDNNP | Si, GaN | 与 DFT 偏差 <1%（Si）/ <5.4%（GaN） | 力训练 RMSE <40 meV/Å |
+| Korotaev 2019 [4] | MTP | CoSb$_3$ | BTE 与 Green–Kubo 互洽 | 主动学习，数百次 QM 计算 |
+| Zhang 2021 [8] | GAP | h-BN 单层 | 与冻声子计算吻合 | 30% 代表性构型；高阶力常数作判据 |
+| Liu 2021 [9] | MTP | w-BAs | 含四声子 $\kappa$=1036 W/(m·K) | MLIP 提取四阶力常数 |
+| Choi 2022 [11] | NNP | 25 种材料 | 与 DFT 持平 | 50–700 K MD 轨迹；2–10× 加速 |
+| Srivastava 2024 [5] | 局部 PES 学习 | 220 种三元材料 | $\kappa$ 误差 <10% | 免完整势训练；>10× 加速 |
+
+## 五、分子动力学路线：从可行到可信，中间隔着系统性偏差
+
+该分支回答 RQ1 的另一半与 RQ2 的主体：MLIP 驱动分子动力学天然包含全阶非谐效应，可处理 BTE 难以触及的体系，但"可行"到"可信"之间暴露了该路线特有的偏差模式。
+
+早期工作验证了 MD 路线对 BTE 盲区体系的独特价值。Qian 等通过随机采样势能面训练 ML 势，用平衡态 MD 同时算准了晶态与非晶硅的热导率 [12]——非晶体系正是声子准粒子图像失效、BTE 框架无力的代表。Zhang 与 Sun 为硅烯构造 GAP 并用趋近平衡 MD 给出室温热导率 32.4±2.9 W/(m·K)，与 BTE 第一性原理预测（约 30 W/(m·K)）吻合 [13]，在二维材料上完成了一次路线交叉验证。Verdi 等则展示了在线（on-the-fly）贝叶斯学习的效率优势：氧化锆势函数在 MD 过程中自动训练，准确复现熔点以下的温致相变，并以 Green–Kubo 计算全阶非谐热输运 [14]。架构维度上，Fan 等提出的神经进化势（NEP）在单张 V100 上达到每秒 $10^7$ 原子步的速度，并原生提供逐原子热流，明确以强非谐与无序体系的热输运为目标场景 [15]；Lee 等将 E(3) 等变图神经网络势用于相变材料 GeTe，一个势函数同时描述非晶、菱方与立方三相，Green–Kubo 结果准确捕捉强非谐性，而仅含三声子的 BTE 在晶相高估热导率约一倍 [16]。
+
+但该分支在 2023–2024 年迎来了两篇方法论纠偏工作，显著改变了结果的可信度边界。其一，Langer 等指出消息传递型 MLIP 的半局域相互作用使传统热流分解失效，推导出适配该类势的热流公式并可用自动微分高效实现 [17]——这意味着此前用等变 GNN 类势跑 Green–Kubo 的部分实现可能使用了不严格的热流定义。其二，Zhou 等以 BAs 为原型系统揭示：**NEP、DP、MTP 三种架构的 MD 模拟一致性地低估热导率**，根源是拟合残差等价于对原子施加随机力、额外散射低频声子；他们利用力误差与 Langevin 热浴随机力同服从高斯分布这一观察，通过可控噪声外推到零力误差极限修正结果，在 200–600 K 与实验吻合；同一工作还证明力常数（LD）路线对力误差显著不敏感 [18]。这一发现对 RQ2 有直接含义：不同架构的 MLIP 在 MD 热导任务上共享同一失效模式，而该失效模式在 BTE 路线上基本不存在——架构差异退居其次，路线差异才是系统性的。
+
+应用广度上，深度势（DP）被用于揭示 CsPbBr$_3$ 钙钛矿中超低热导率（NEMD 给出 0.43±0.01 W/(m·K)，与实验一致）的缺陷调控机制 [19]；统一 NEP 势（UNEP-v1）则用一个模型覆盖 16 种单质金属及其合金，HNEMD 结果与仅含声子—声子散射的 BTE 一致，而传统 EAM 势做不到这一点 [6]。
+
+## 六、强非谐体系：超越微扰论从例外变为必需
+
+该分支回答 RQ3 中最物理的部分。当非谐性强到声子散射率逼近或超过 Ioffe–Regel 极限时，微扰论不是"精度差"而是"框架错"，MLIP 使 Green–Kubo 这类非微扰方法在此类材料上首次成为常规工具。
+
+Mandal 等对 TlAgSe 与层状钙钛矿 Cs$_2$PbI$_2$Cl$_2$ 的研究显示，MLIP 驱动的 Green–Kubo 计算能复现实验的超低热导率（<1 W/(m·K)），而两种材料的声子散射率均超出 Ioffe–Regel 极限、非谐度参数 $\sigma_A>0.5$，确认了微扰 BTE 的失效 [20]。Zhang 等对 Rb$_2$ZnTe 的工作给出了更尖锐的对照：即便在 BTE 中计入完整的三、四次非谐与非对角相干贡献，Green–Kubo（MLIP + GPUMD）给出的 300 K 热导率仍比此前的微扰估计高 38%，体系贴近非晶极限 [21]。值得注意的是，Korotaev 2019 在中等非谐的 CoSb$_3$ 上 BTE 与 Green–Kubo 互相吻合 [4]，而 Lee 2024 在强非谐 GeTe 上 BTE 高估一倍 [16]——两个结果并置，勾勒出路线分歧的非谐强度阈值图景（第八节正式裁决）。
+
+高阶散射是否可忽略是另一个被 MLIP 改写的争议。四声子散射在 BAs 类高热导材料中削减 $\kappa$ 达 40–60% [10, 9]；但 Kocabaş 等用 GAP、MACE、NEP、HIPHIVE 四套 MLIP 对 MoS$_2$ 与 MoSe$_2$ 做超出常规极限的收敛性检验后指出，完全收敛的四声子过程对这两种二维材料的本征热导率贡献可忽略，与部分早期声明相反 [22]。MLIP 在这里的贡献不是给出某个数值，而是**让"完全收敛的四声子检验"本身第一次算得起**，从而把一场由计算截断驱动的争议变成了可裁决的问题。
+
+## 七、从专用势到通用模型：可迁移性的前沿与天花板
+
+该分支回答 RQ2 与 RQ3 的交叉部分。前述工作几乎都是"一种材料（或一族材料）训一个势"，2024 年后的前沿是打破这一模式。
+
+统一势方向，UNEP-v1 已能以单一模型处理 16 种金属的声子热输运 [6]；更激进的基础模型方向，Póta 等对 103 种固体系统评估了基础原子模型直接预测热导率的能力，其核心发现具有警示性：**此前业界用形成能与谐和振动指标做基准，并不能反映模型在真实非谐动力学与可观测量上的表现**，必须经由 Wigner 热输运框架的物理感知基准与微调协议才能达到第一性原理精度 [23]。Koker 等从损失函数角度给出互补方案：标准的能量—力—应力损失会系统性劣化势能面曲率，他们提出的声子微调（PFT）直接以 DFT 二阶力常数监督 MLIP 的 Hessian，在声子热力学性质上平均改进 55%，并连带改善依赖三阶导数的热导率预测 [24]。这两项工作合看，勾勒出通用模型在热导任务上的现实路径——不是"下载即用"，而是"基础模型 + 物理监督微调"。Kocabaş 等的多框架基准（GAP/MACE/NEP/HIPHIVE 对照 DFT）则提供了这类评估的方法论样板 [22]。核量子效应维度，Ying 等把路径积分 MD（TRPMD）与 NEP 结合，以经典势的成本在 LiH 同位素效应、MOF 热性质等案例上复现核量子效应 [25]，补上了 MLIP 热导计算中长期被经典力学近似掩盖的一块。
+
+## 八、综合讨论
+
+**争议一：BTE 与 MD 路线何时一致、何时分歧？** 把各分支证据按非谐强度排布，可以得到一个有条件立场：在中等非谐晶体（CoSb$_3$、硅烯）上，两条路线互相吻合 [4, 13]；在强非谐体系（GeTe、TlAgSe、Rb$_2$ZnTe）上，微扰 BTE 系统性偏离——GeTe 中高估约一倍 [16]，Rb$_2$ZnTe 中低估约 38%（相对 Green–Kubo）[21]，偏离方向不固定但量级均不容忽略。一个可检验的机制解释是：偏差方向取决于被略去的高阶过程在净效应上是增加还是减少散射通道，而判据性指标是散射率与 Ioffe–Regel 极限的相对位置 [20]（L3，机制性推断）。因此实践结论是条件化的：散射率远低于该极限时 BTE 路线成本优势明显；接近或超越时 Green–Kubo 是必需而非可选。
+
+**争议二："达到 DFT 精度"到底由什么担保？** 三篇方法学工作从不同角度指向同一结论：力误差达标是必要而不充分的。Zhang 等证明高阶力常数比谐和性质更敏感地暴露势函数缺陷 [8]；Zhou 等进一步定量化了传递路径——MD 路线中力残差作为随机扰动增强低频声子散射、系统性低估 $\kappa$，而 LD/BTE 路线因力常数由统计平均获得而对同类误差不敏感 [18]；Koker 等则把根因定位到训练损失本身不监督曲率 [24]。三者的收敛不是巧合：热导率依赖势能面的高阶导数与长时间动力学，而标准训练信号只含能量与力（L3）。据此推断，**热导导向的 MLIP 评估协议应当把三阶力常数误差或小规模 Green–Kubo 对照纳入验收标准，而非仅报告力 RMSE**（L4，可直接执行的协议建议）。
+
+**跨分支趋势：验证逻辑的演化。** 2019–2021 年的工作是"单体系点对点验证"（与 DFT 或实验比数值）；2022–2024 年转向"协议级验证"（训练集选择 [11]、热流公式 [17]、力误差修正 [18]）；2024 年后进入"框架级基准"（多 MLIP 横向对比 [22]、基础模型物理基准 [23]）。这条演化线本身就是领域成熟的证据，同时也说明早期的许多"达到 DFT 精度"声明是在较弱验收标准下作出的——用今天的方法学标准回看，其中一部分可能带有 Zhou 等揭示的那类系统性低估。
+
+## 九、开放问题与未来方向
+
+1. **力误差修正的普适性未确立。** Langevin 噪声外推修正目前主要在 BAs 一种材料上以三种架构验证 [18]；该修正是否可迁移到强非谐体系（力误差与真实非谐散射可能不可加）需要专门设计的研究裁决——这直接决定 MD 路线在超低 $\kappa$ 材料上的定量可信度。
+2. **分类框架中的空格：低温区。** 入选文献的验证温度几乎全部在 200 K 及以上；更低温区 $\kappa$ 对边界散射、同位素散射与量子占据数敏感，而 MLIP 训练集多为有限温度 MD 轨迹，其相空间覆盖能否支撑低温热导预测，入选文献中无系统检验。
+3. **四声子争议的方法学出口。** BAs（显著 [10, 9]）与 MoS$_2$/MoSe$_2$（可忽略 [22]）的对立已有材料层面的解释方向（散射相空间），但缺乏跨材料族的统一判据研究——用同一套收敛协议扫描数十种材料、建立"何时必须算四声子"的可操作规则，是当前杠杆最高的一项基准工作。
+4. **基础模型的热导微调协议竞争。** PFT 的 Hessian 监督 [24] 与 Póta 等的 Wigner 基准微调 [23] 尚未在同一测试集上对照；两者结合（曲率监督 + 物理基准验收）是否能让通用势免 DFT 地通过 Kocabaş 式的收敛检验，是一个具体、可检验的近期目标。
+
+## 十、结论
+
+**RQ1（精度—效率权衡）：** 两条路线均已在多材料规模上达到与 DFT 持平的精度——BTE 路线 220 种材料误差 10% 以内、加速一个量级以上 [5]，25 种材料全面持平、加速 2–10 倍 [11]；MD 路线在非晶 [12]、相变 [14, 16] 等 BTE 无力体系上提供独有的定量能力。但收益是有条件的：BTE 路线的关键依赖是训练集温度覆盖 [11] 与高阶力常数验收 [8]；MD 路线则必须正视力残差导致的系统性低估并施加修正 [18]。
+
+**RQ2（架构边界）：** 架构间差异（GAP/MTP/HDNNP/NEP/DP/等变 GNN）主要体现在训练效率与实现成本上，而非热导精度上——三种不同架构在 MD 中共享同一种低估模式 [18]，四类框架在同一基准上互相对标 [22]。真正的边界不在架构而在两处：消息传递类势需要专门的热流公式 [17]；所有架构的标准训练损失都不监督势能面曲率 [24]。
+
+**RQ3（未决挑战）：** 高阶非谐的可计算性已被 MLIP 基本解决（四声子检验算得起 [9, 22]），但"何时必须算"缺统一判据；强非谐体系中 Green–Kubo 路线已取代微扰论成为标准工具 [20, 21]；核量子效应有了可行的 NEP-PIMD 路径 [25]；可迁移性方面，统一势已覆盖金属族 [6]，而基础模型的零样本热导预测尚不可靠，"基础模型 + 物理感知微调"是当前的现实天花板与最活跃前沿 [23, 24]。
+
+本综述的核心贡献在于把两条技术路线放在同一验收标准下对照：力常数—BTE 路线与 MD 路线的精度声明建立在不同严格度的检验上，2024 年后的方法学工作表明前者的声明普遍更稳健、后者存在刚被认识到的系统性偏差；路线选择的决定因素不是 MLIP 架构，而是目标体系的非谐强度与目标精度的验收协议。
+
+## 参考文献
+
+[1] Broido D, Ward A, Mingo N, “Lattice thermal conductivity of silicon from empirical interatomic potentials,” Physical Review B, 2005.
+[2] Arabha S, et al., “Recent advances in lattice thermal conductivity calculation using machine-learning interatomic potentials,” Journal of Applied Physics, 2021.
+[3] Dong H, et al., “Molecular dynamics simulations of heat transport using machine-learned potentials: A mini-review and tutorial on GPUMD with neuroevolution potentials,” Journal of Applied Physics, 2024.
+[4] Korotaev P, et al., “Accessing thermal conductivity of complex compounds by machine learning interatomic potentials,” Physical Review B, 2019.
+[5] Srivastava Y, Jain A, “Accelerating prediction of phonon thermal conductivity by an order of magnitude through machine learning assisted extraction of anharmonic force constants,” Physical Review B, 2024.
+[6] Cao S, et al., “Lattice thermal conductivity of 16 elemental metals from molecular dynamics simulations with a unified neuroevolution potential,” Journal of Applied Physics, 2025.
+[7] Minamitani E, Ogura M, Watanabe S, “Simulating lattice thermal conductivity in semiconducting materials using high-dimensional neural network potential,” Applied Physics Express, 2019.
+[8] Zhang Y, Shen C, Long T, Zhang H, “Thermal conductivity of h-BN monolayers using machine learning interatomic potential,” Journal of Physics: Condensed Matter, 2021.
+[9] Liu Z, Yang X, Zhang B, Li W, “High Thermal Conductivity of Wurtzite Boron Arsenide Predicted by Including Four-Phonon Scattering with Machine Learning Potential,” ACS Applied Materials & Interfaces, 2021.
+[10] Feng T, Lindsay L, Ruan X, “Four-phonon scattering significantly reduces intrinsic thermal conductivity of solids,” Physical Review B, 2017.
+[11] Choi J M, et al., “Accelerated computation of lattice thermal conductivity using neural network interatomic potentials,” Computational Materials Science, 2022.
+[12] Qian X, et al., “Thermal conductivity modeling using machine learning potentials: application to crystalline and amorphous silicon,” Materials Today Physics, 2019.
+[13] Zhang C, Sun Q, “Gaussian approximation potential for studying the thermal conductivity of silicene,” Journal of Applied Physics, 2019.
+[14] Verdi C, et al., “Thermal transport and phase transitions of zirconia by on-the-fly machine-learned interatomic potentials,” npj Computational Materials, 2021.
+[15] Fan Z, et al., “Neuroevolution machine learning potentials: Combining high accuracy and low cost in atomistic simulations and application to heat transport,” Physical Review B, 2021.
+[16] Lee S-H, et al., “Equivariant graph neural network interatomic potential for Green-Kubo thermal conductivity in phase change materials,” Physical Review Materials, 2024.
+[17] Langer M F, et al., “Heat flux for semilocal machine-learning potentials,” Physical Review B, 2023.
+[18] Zhou W, et al., “Insight into the effect of force error on the thermal conductivity from machine-learned potentials,” Materials Today Physics, 2024.
+[19] Han S, Ji Y, Li Y, “Effect of Cs vacancy on thermal conductivity in CsPbBr3 perovskites unveiled by deep potential molecular dynamics,” Nanoscale, 2025.
+[20] Mandal S, et al., “Probing Lattice Anharmonicity and Thermal Transport in Ultralow-κ Materials Using Machine Learning Interatomic Potentials,” Small, 2025.
+[21] Zhang X, et al., “Beyond Boltzmann transport: Green-Kubo prediction of lattice thermal conductivity with machine-learned potentials,” The Journal of Chemical Physics, 2026.
+[22] Kocabaş T, et al., “Thermal conductivity limits of MoS2 and MoSe2: Revisiting high-order anharmonic lattice dynamics with machine learning potentials,” Applied Physics Reviews, 2025.
+[23] Póta B, Ahlawat P, Csányi G, Simoncelli M, “Thermal Conductivity Predictions with Foundation Atomistic Models,” arXiv (Cornell University), 2025.
+[24] Koker T, et al., “PFT: Phonon Fine-tuning for Machine Learned Interatomic Potentials,” arXiv (Cornell University), 2026.
+[25] Ying P, et al., “Highly efficient path-integral molecular dynamics simulations with GPUMD using neuroevolution potentials: Case studies on thermal properties of materials,” The Journal of Chemical Physics, 2025.

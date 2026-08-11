@@ -1,0 +1,384 @@
+{
+  "entries": [
+    {
+      "id": 1,
+      "key": "Broido2005",
+      "first_author": "Broido",
+      "authors": "Broido D, Ward A, Mingo N",
+      "year": "2005",
+      "title": "Lattice thermal conductivity of silicon from empirical interatomic potentials",
+      "venue": "Physical Review B",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Broido2005"
+      ],
+      "role": "背景：经验势的局限",
+      "note": "paper:10.1103/physrevb.72.014308"
+    },
+    {
+      "id": 2,
+      "key": "Feng2017",
+      "first_author": "Feng",
+      "authors": "Feng T, Lindsay L, Ruan X",
+      "year": "2017",
+      "title": "Four-phonon scattering significantly reduces intrinsic thermal conductivity of solids",
+      "venue": "Physical Review B",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Feng2017"
+      ],
+      "role": "背景：四声子散射",
+      "note": "paper:10.1103/physrevb.96.161201"
+    },
+    {
+      "id": 3,
+      "key": "Arabha2021",
+      "first_author": "Arabha",
+      "authors": "Arabha S, et al.",
+      "year": "2021",
+      "title": "Recent advances in lattice thermal conductivity calculation using machine-learning interatomic potentials",
+      "venue": "Journal of Applied Physics",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Arabha2021"
+      ],
+      "role": "综述",
+      "note": "paper:10.1063/5.0069443"
+    },
+    {
+      "id": 4,
+      "key": "Dong2024",
+      "first_author": "Dong",
+      "authors": "Dong H, et al.",
+      "year": "2024",
+      "title": "Molecular dynamics simulations of heat transport using machine-learned potentials: A mini-review and tutorial on GPUMD with neuroevolution potentials",
+      "venue": "Journal of Applied Physics",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Dong2024"
+      ],
+      "role": "综述/教程",
+      "note": "paper:10.1063/5.0200833"
+    },
+    {
+      "id": 5,
+      "key": "Fan2021",
+      "first_author": "Fan",
+      "authors": "Fan Z, et al.",
+      "year": "2021",
+      "title": "Neuroevolution machine learning potentials: Combining high accuracy and low cost in atomistic simulations and application to heat transport",
+      "venue": "Physical Review B",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Fan2021"
+      ],
+      "role": "方法：NEP",
+      "note": "paper:10.1103/physrevb.104.104309"
+    },
+    {
+      "id": 6,
+      "key": "Minamitani2019",
+      "first_author": "Minamitani",
+      "authors": "Minamitani E, Ogura M, Watanabe S",
+      "year": "2019",
+      "title": "Simulating lattice thermal conductivity in semiconducting materials using high-dimensional neural network potential",
+      "venue": "Applied Physics Express",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Minamitani2019"
+      ],
+      "role": "BTE路线",
+      "note": "paper:10.7567/1882-0786/ab36bc"
+    },
+    {
+      "id": 7,
+      "key": "Korotaev2019",
+      "first_author": "Korotaev",
+      "authors": "Korotaev P, et al.",
+      "year": "2019",
+      "title": "Accessing thermal conductivity of complex compounds by machine learning interatomic potentials",
+      "venue": "Physical Review B",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Korotaev2019"
+      ],
+      "role": "BTE路线+主动学习",
+      "note": "paper:10.1103/physrevb.100.144308; doc_id f9188832da2de9fd56c3a8d5d18873f80b3d8d2a5672c43182e3762c9df40e28"
+    },
+    {
+      "id": 8,
+      "key": "ZhangHBN2021",
+      "first_author": "Zhang",
+      "authors": "Zhang Y, Shen C, Long T, Zhang H",
+      "year": "2021",
+      "title": "Thermal conductivity of h-BN monolayers using machine learning interatomic potential",
+      "venue": "Journal of Physics: Condensed Matter",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "ZhangHBN2021"
+      ],
+      "role": "BTE路线：高阶力常数检验",
+      "note": "paper:10.1088/1361-648x/abcf61"
+    },
+    {
+      "id": 9,
+      "key": "Liu2021",
+      "first_author": "Liu",
+      "authors": "Liu Z, Yang X, Zhang B, Li W",
+      "year": "2021",
+      "title": "High Thermal Conductivity of Wurtzite Boron Arsenide Predicted by Including Four-Phonon Scattering with Machine Learning Potential",
+      "venue": "ACS Applied Materials & Interfaces",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Liu2021"
+      ],
+      "role": "BTE路线：四声子",
+      "note": "paper:10.1021/acsami.1c11595"
+    },
+    {
+      "id": 10,
+      "key": "Choi2022",
+      "first_author": "Choi",
+      "authors": "Choi J M, et al.",
+      "year": "2022",
+      "title": "Accelerated computation of lattice thermal conductivity using neural network interatomic potentials",
+      "venue": "Computational Materials Science",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Choi2022"
+      ],
+      "role": "BTE路线：多材料基准",
+      "note": "paper:10.1016/j.commatsci.2022.111472"
+    },
+    {
+      "id": 11,
+      "key": "Srivastava2024",
+      "first_author": "Srivastava",
+      "authors": "Srivastava Y, Jain A",
+      "year": "2024",
+      "title": "Accelerating prediction of phonon thermal conductivity by an order of magnitude through machine learning assisted extraction of anharmonic force constants",
+      "venue": "Physical Review B",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Srivastava2024"
+      ],
+      "role": "BTE路线：力常数加速",
+      "note": "paper:10.1103/physrevb.110.165202"
+    },
+    {
+      "id": 12,
+      "key": "Qian2019",
+      "first_author": "Qian",
+      "authors": "Qian X, et al.",
+      "year": "2019",
+      "title": "Thermal conductivity modeling using machine learning potentials: application to crystalline and amorphous silicon",
+      "venue": "Materials Today Physics",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Qian2019"
+      ],
+      "role": "MD路线：非晶",
+      "note": "paper:10.1016/j.mtphys.2019.100140"
+    },
+    {
+      "id": 13,
+      "key": "ZhangSun2019",
+      "first_author": "Zhang",
+      "authors": "Zhang C, Sun Q",
+      "year": "2019",
+      "title": "Gaussian approximation potential for studying the thermal conductivity of silicene",
+      "venue": "Journal of Applied Physics",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "ZhangSun2019"
+      ],
+      "role": "MD路线：二维材料",
+      "note": "paper:10.1063/1.5119281"
+    },
+    {
+      "id": 14,
+      "key": "Verdi2021",
+      "first_author": "Verdi",
+      "authors": "Verdi C, et al.",
+      "year": "2021",
+      "title": "Thermal transport and phase transitions of zirconia by on-the-fly machine-learned interatomic potentials",
+      "venue": "npj Computational Materials",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "on-the-fly",
+        "Verdi2021"
+      ],
+      "role": "MD路线：在线学习+相变",
+      "note": "paper:10.1038/s41524-021-00630-5"
+    },
+    {
+      "id": 15,
+      "key": "Langer2023",
+      "first_author": "Langer",
+      "authors": "Langer M F, et al.",
+      "year": "2023",
+      "title": "Heat flux for semilocal machine-learning potentials",
+      "venue": "Physical Review B",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Langer2023"
+      ],
+      "role": "方法学：热流公式",
+      "note": "paper:10.1103/physrevb.108.l100302"
+    },
+    {
+      "id": 16,
+      "key": "Lee2024",
+      "first_author": "Lee",
+      "authors": "Lee S-H, et al.",
+      "year": "2024",
+      "title": "Equivariant graph neural network interatomic potential for Green-Kubo thermal conductivity in phase change materials",
+      "venue": "Physical Review Materials",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "equivariant GNN",
+        "Lee2024"
+      ],
+      "role": "MD路线：等变GNN",
+      "note": "paper:10.1103/physrevmaterials.8.033802"
+    },
+    {
+      "id": 17,
+      "key": "Han2025",
+      "first_author": "Han",
+      "authors": "Han S, Ji Y, Li Y",
+      "year": "2025",
+      "title": "Effect of Cs vacancy on thermal conductivity in CsPbBr3 perovskites unveiled by deep potential molecular dynamics",
+      "venue": "Nanoscale",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Han2025"
+      ],
+      "role": "MD路线：DP+缺陷",
+      "note": "paper:10.1039/d4nr05458j"
+    },
+    {
+      "id": 18,
+      "key": "Cao2025",
+      "first_author": "Cao",
+      "authors": "Cao S, et al.",
+      "year": "2025",
+      "title": "Lattice thermal conductivity of 16 elemental metals from molecular dynamics simulations with a unified neuroevolution potential",
+      "venue": "Journal of Applied Physics",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "UNEP-v1",
+        "Cao2025"
+      ],
+      "role": "MD路线：统一势",
+      "note": "paper:10.1063/5.0275820"
+    },
+    {
+      "id": 19,
+      "key": "Mandal2025",
+      "first_author": "Mandal",
+      "authors": "Mandal S, et al.",
+      "year": "2025",
+      "title": "Probing Lattice Anharmonicity and Thermal Transport in Ultralow-κ Materials Using Machine Learning Interatomic Potentials",
+      "venue": "Small",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Mandal2025"
+      ],
+      "role": "强非谐：Green-Kubo",
+      "note": "paper:10.1002/smll.202513476"
+    },
+    {
+      "id": 20,
+      "key": "ZhangRb2026",
+      "first_author": "Zhang",
+      "authors": "Zhang X, et al.",
+      "year": "2026",
+      "title": "Beyond Boltzmann transport: Green-Kubo prediction of lattice thermal conductivity with machine-learned potentials",
+      "venue": "The Journal of Chemical Physics",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "ZhangRb2026"
+      ],
+      "role": "强非谐：超越BTE",
+      "note": "paper:10.1063/5.0297462"
+    },
+    {
+      "id": 21,
+      "key": "Pota2025",
+      "first_author": "Póta",
+      "authors": "Póta B, Ahlawat P, Csányi G, Simoncelli M",
+      "year": "2025",
+      "title": "Thermal Conductivity Predictions with Foundation Atomistic Models",
+      "venue": "arXiv (Cornell University)",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Pota2025"
+      ],
+      "role": "前沿：基础模型",
+      "note": "paper:10.48550/arxiv.2408.00755"
+    },
+    {
+      "id": 22,
+      "key": "Kocabas2025",
+      "first_author": "Kocabaş",
+      "authors": "Kocabaş T, et al.",
+      "year": "2025",
+      "title": "Thermal conductivity limits of MoS2 and MoSe2: Revisiting high-order anharmonic lattice dynamics with machine learning potentials",
+      "venue": "Applied Physics Reviews",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Kocabas2025"
+      ],
+      "role": "前沿：多框架基准",
+      "note": "paper:10.1063/5.0300627"
+    },
+    {
+      "id": 23,
+      "key": "Ying2025",
+      "first_author": "Ying",
+      "authors": "Ying P, et al.",
+      "year": "2025",
+      "title": "Highly efficient path-integral molecular dynamics simulations with GPUMD using neuroevolution potentials: Case studies on thermal properties of materials",
+      "venue": "The Journal of Chemical Physics",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "NEP-PIMD",
+        "Ying2025"
+      ],
+      "role": "前沿：核量子效应",
+      "note": "paper:10.1063/5.0241006"
+    },
+    {
+      "id": 24,
+      "key": "Koker2026",
+      "first_author": "Koker",
+      "authors": "Koker T, et al.",
+      "year": "2026",
+      "title": "PFT: Phonon Fine-tuning for Machine Learned Interatomic Potentials",
+      "venue": "arXiv (Cornell University)",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "PFT",
+        "Koker2026"
+      ],
+      "role": "前沿：声子微调",
+      "note": "paper:10.48550/arxiv.2601.07742"
+    },
+    {
+      "id": 25,
+      "key": "Zhou2024",
+      "first_author": "Zhou",
+      "authors": "Zhou W, et al.",
+      "year": "2024",
+      "title": "Insight into the effect of force error on the thermal conductivity from machine-learned potentials",
+      "venue": "Materials Today Physics",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Zhou2024"
+      ],
+      "role": "批判视角：力误差",
+      "note": "paper:10.1016/j.mtphys.2024.101638"
+    }
+  ]
+}
