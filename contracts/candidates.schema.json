@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "candidates",
+  "description": "M2 Node B retrieve_fanout 单个子任务的候选落盘文件（规格 §2）。每个子代理只写自己的候选文件；必填 title/first_author/source，其余字段铸账时透传。",
+  "type": "object",
+  "required": ["subtask", "rq", "perspective", "candidates"],
+  "properties": {
+    "subtask": {"type": "string", "minLength": 1},
+    "rq": {"type": "string", "minLength": 1},
+    "perspective": {"type": "string", "minLength": 1},
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "first_author", "source"],
+        "properties": {
+          "unique_id": {"type": "string"},
+          "doc_id": {"type": "string"},
+          "title": {"type": "string", "minLength": 1},
+          "first_author": {"type": "string", "minLength": 1},
+          "authors": {"type": "string"},
+          "year": {"type": "string"},
+          "venue": {"type": "string"},
+          "source": {"enum": ["sciverse", "arxiv", "openalex", "crossref"]},
+          "verify_status": {"enum": ["VERIFIED", "MINOR", "PAYWALL", "UNVERIFIED", "MAJOR", "UNVERIFIABLE"]},
+          "aliases": {"type": "array", "items": {"type": "string"}},
+          "doi": {"type": "string"},
+          "volume": {"type": "string"},
+          "issue": {"type": "string"},
+          "pages": {"type": "string"},
+          "role": {"type": "string"},
+          "note": {"type": "string"},
+          "notes": {"type": "string"}
+        }
+      }
+    }
+  }
+}

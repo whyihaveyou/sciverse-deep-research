@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ledger_entry",
+  "description": "M2 Node C ledger_build 铸账条目（规格 §2/§3），对齐 citation_ledger.py 台账字段。完整性校验以 citation_ledger.validate_entries 为准；本 schema 兜住结构级破坏（id 非正整数、缺 title、非法 verify_status）。",
+  "type": "object",
+  "required": ["id", "title", "verify_status"],
+  "properties": {
+    "id": {"type": "integer", "minimum": 1},
+    "key": {"type": "string"},
+    "first_author": {"type": "string"},
+    "authors": {"type": "string"},
+    "year": {"type": "string"},
+    "title": {"type": "string", "minLength": 1},
+    "venue": {"type": "string"},
+    "verify_status": {"enum": ["VERIFIED", "MINOR", "PAYWALL", "UNVERIFIED", "MAJOR", "UNVERIFIABLE"]},
+    "aliases": {"type": "array", "items": {"type": "string"}},
+    "role": {"type": "string"},
+    "criteria": {"type": "object"},
+    "note": {"type": "string"},
+    "doi": {"type": "string"},
+    "volume": {"type": "string"},
+    "issue": {"type": "string"},
+    "pages": {"type": "string"},
+    "unique_id": {"type": "string"},
+    "doc_id": {"type": "string"}
+  }
+}
