@@ -1,0 +1,389 @@
+{
+  "entries": [
+    {
+      "id": 1,
+      "key": "Arabha2021",
+      "first_author": "Arabha",
+      "authors": "Arabha S, Aghbolagh ZS, Ghorbani K, Hatam-Lee SM, Rajabpour A",
+      "title": "Recent advances in lattice thermal conductivity calculation using machine-learning interatomic potentials",
+      "venue": "Journal of Applied Physics",
+      "year": "2021",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Arabha2021",
+        "MLIP review"
+      ],
+      "unique_id": "paper:10.1063/5.0069443",
+      "note": "综述"
+    },
+    {
+      "id": 2,
+      "key": "Dong2024",
+      "first_author": "Dong",
+      "authors": "Dong H, Shi Y, Ying P, Xu K, Liang T, Wang Y, Zeng Z, Wu X, Zhou W, Xiong S, Chen S, Fan Z",
+      "title": "Molecular dynamics simulations of heat transport using machine-learned potentials: A mini-review and tutorial on GPUMD with neuroevolution potentials",
+      "venue": "Journal of Applied Physics",
+      "year": "2024",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Dong2024",
+        "GPUMD",
+        "NEP tutorial"
+      ],
+      "unique_id": "paper:10.1063/5.0200833",
+      "note": "综述/教程"
+    },
+    {
+      "id": 3,
+      "key": "Mortazavi2020",
+      "first_author": "Mortazavi",
+      "authors": "Mortazavi B, Podryabinkin EV, Roche S, Rabczuk T, Zhuang X, Shapeev AV",
+      "title": "Machine-learning interatomic potentials enable first-principles multiscale modeling of lattice thermal conductivity in graphene/borophene heterostructures",
+      "venue": "Materials Horizons",
+      "year": "2020",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Mortazavi2020",
+        "multiscale MLIP"
+      ],
+      "unique_id": "paper:10.1039/d0mh00787k",
+      "note": "奠基级"
+    },
+    {
+      "id": 4,
+      "key": "Ladygin2020",
+      "first_author": "Ladygin",
+      "authors": "Ladygin V, Korotaev P, Yanilkin AV, Shapeev AV",
+      "title": "Lattice dynamics simulation using machine learning interatomic potentials",
+      "venue": "Computational Materials Science",
+      "year": "2020",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Ladygin2020",
+        "MTP lattice dynamics"
+      ],
+      "unique_id": "paper:10.1016/j.commatsci.2019.109333",
+      "note": "MTP 方法"
+    },
+    {
+      "id": 5,
+      "key": "Choi2022",
+      "first_author": "Choi",
+      "authors": "Choi JM, Lee K, Kim S, Moon M, Jeong W, Han S",
+      "title": "Accelerated computation of lattice thermal conductivity using neural network interatomic potentials",
+      "venue": "Computational Materials Science",
+      "year": "2022",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Choi2022",
+        "NEP standard training set"
+      ],
+      "unique_id": "paper:10.1016/j.commatsci.2022.111472",
+      "note": "25 材料基准"
+    },
+    {
+      "id": 6,
+      "key": "Minamitani2019",
+      "first_author": "Minamitani",
+      "authors": "Minamitani E, Ogura M, Watanabe S",
+      "title": "Simulating lattice thermal conductivity in semiconducting materials using high-dimensional neural network potential",
+      "venue": "Applied Physics Express",
+      "year": "2019",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Minamitani2019",
+        "HDNNP"
+      ],
+      "unique_id": "",
+      "note": "奠基级：Si/GaN"
+    },
+    {
+      "id": 7,
+      "key": "Srivastava2024",
+      "first_author": "Srivastava",
+      "authors": "Srivastava Y, Jain A",
+      "title": "Accelerating prediction of phonon thermal conductivity by an order of magnitude through machine learning assisted extraction of anharmonic force constants",
+      "venue": "Physical Review B",
+      "year": "2024",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Srivastava2024",
+        "anharmonic FC ML"
+      ],
+      "unique_id": "paper:10.1103/physrevb.110.165202",
+      "note": "220 三元材料高通量"
+    },
+    {
+      "id": 8,
+      "key": "Cao2025",
+      "first_author": "Cao",
+      "authors": "Cao S, Wang A, Fan Z, Bao H, Qian P, Su Y, Yan Y",
+      "title": "Lattice thermal conductivity of 16 elemental metals from molecular dynamics simulations with a unified neuroevolution potential",
+      "venue": "Journal of Applied Physics",
+      "year": "2025",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Cao2025",
+        "UNEP-v1"
+      ],
+      "unique_id": "paper:10.1063/5.0275820",
+      "note": "UNEP 通用势"
+    },
+    {
+      "id": 9,
+      "key": "Ouyang2022",
+      "first_author": "Ouyang",
+      "authors": "Ouyang Y, Yu C, He J, Jiang P, Ren W, Chen J",
+      "title": "Accurate description of high-order phonon anharmonicity and lattice thermal conductivity from molecular dynamics simulations with machine learning potential",
+      "venue": "Physical Review B",
+      "year": "2022",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Ouyang2022",
+        "EMD+MLP anharmonicity"
+      ],
+      "unique_id": "paper:10.1103/physrevb.105.115202",
+      "note": "BAs/金刚石"
+    },
+    {
+      "id": 10,
+      "key": "Liu2021BA",
+      "first_author": "Liu",
+      "authors": "Liu Z, Yang X, Zhang B, Li W",
+      "title": "High thermal conductivity of wurtzite boron arsenide predicted by including four-phonon scattering with machine learning potential",
+      "venue": "ACS Applied Materials & Interfaces",
+      "year": "2021",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Liu2021BA",
+        "four-phonon BAs"
+      ],
+      "unique_id": "paper:10.1021/acsami.1c11595",
+      "note": "四声子 MTP"
+    },
+    {
+      "id": 11,
+      "key": "Yang2022",
+      "first_author": "Yang",
+      "authors": "Yang X, Tiwari J, Feng T",
+      "title": "Reduced anharmonic phonon scattering cross-section slows the decrease of thermal conductivity with temperature",
+      "venue": "Materials Today Physics",
+      "year": "2022",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Yang2022",
+        "temperature-dependent cross-section"
+      ],
+      "unique_id": "paper:10.1016/j.mtphys.2022.100689",
+      "note": "温度依赖散射截面"
+    },
+    {
+      "id": 12,
+      "key": "Wu2024",
+      "first_author": "Wu",
+      "authors": "Wu X, Zhou W, Dong H, Ying P, Wang Y, Song B, Fan Z, Xiong S",
+      "title": "Correcting force error-induced underestimation of lattice thermal conductivity in machine learning molecular dynamics",
+      "venue": "Journal of Chemical Physics",
+      "year": "2024",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Wu2024",
+        "LTC underestimation correction"
+      ],
+      "unique_id": "paper:10.1063/5.0213811",
+      "note": "批评/纠偏"
+    },
+    {
+      "id": 13,
+      "key": "Kocabas2025",
+      "first_author": "Kocabas",
+      "authors": "Kocabas T, Keçeli M, Gürel T, Milošević MV, Sevik C",
+      "title": "Thermal conductivity limits of MoS2 and MoSe2: Revisiting high-order anharmonic lattice dynamics with machine learning potentials",
+      "venue": "Applied Physics Reviews",
+      "year": "2025",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Kocabas2025",
+        "MoS2 foundation models"
+      ],
+      "unique_id": "paper:10.1063/5.0300627",
+      "note": "GAP/MACE/NEP/hiphive 基准"
+    },
+    {
+      "id": 14,
+      "key": "ZhangY2021",
+      "first_author": "Zhang",
+      "authors": "Zhang Y, Shen C, Long T, Zhang H",
+      "title": "Thermal conductivity of h-BN monolayers using machine learning interatomic potential",
+      "venue": "Journal of Physics: Condensed Matter",
+      "year": "2021",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "ZhangY2021",
+        "hBN GAP"
+      ],
+      "unique_id": "paper:10.1088/1361-648X/abcf61",
+      "note": "GAP h-BN"
+    },
+    {
+      "id": 15,
+      "key": "Han2023",
+      "first_author": "Han",
+      "authors": "Han J, Zeng Q, Chen K, Yu X, Dai J",
+      "title": "Lattice thermal conductivity of monolayer InSe calculated by machine learning potential",
+      "venue": "Nanomaterials",
+      "year": "2023",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Han2023",
+        "InSe GK-DP"
+      ],
+      "unique_id": "paper:10.3390/nano13091576",
+      "note": "GK-DP vs BTE-DFT"
+    },
+    {
+      "id": 16,
+      "key": "Sha2023",
+      "first_author": "Sha",
+      "authors": "Sha W, Dai X, Chen S, Yin B, Guo F",
+      "title": "Phonon thermal transport in two-dimensional PbTe monolayers via extensive molecular dynamics simulations with a neuroevolution potential",
+      "venue": "Materials Today Physics",
+      "year": "2023",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Sha2023",
+        "2D PbTe NEP"
+      ],
+      "unique_id": "paper:10.1016/j.mtphys.2023.101066",
+      "note": "2D 热电"
+    },
+    {
+      "id": 17,
+      "key": "Fujii2022",
+      "first_author": "Fujii",
+      "authors": "Fujii S, Seko A",
+      "title": "Structure and lattice thermal conductivity of grain boundaries in silicon by using machine learning potential and molecular dynamics",
+      "venue": "Computational Materials Science",
+      "year": "2022",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Fujii2022",
+        "Si grain boundary"
+      ],
+      "unique_id": "paper:10.1016/j.commatsci.2021.111137",
+      "note": "界面/晶界"
+    },
+    {
+      "id": 18,
+      "key": "ZhangJ2024",
+      "first_author": "Zhang",
+      "authors": "Zhang J, Zhang H, Xiong J, Chen S, Zhang G",
+      "title": "Tuning lattice thermal conductivity in NbMoTaW refractory high-entropy alloys: Insights from molecular dynamics using machine learning potential",
+      "venue": "Journal of Applied Physics",
+      "year": "2024",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "ZhangJ2024",
+        "RHEA"
+      ],
+      "unique_id": "paper:10.1063/5.0223074",
+      "note": "高熵合金"
+    },
+    {
+      "id": 19,
+      "key": "Li2020Ga2O3",
+      "first_author": "Li",
+      "authors": "Li R, Liu Z, Rohskopf A, Gordiz K, Henry A, Lee E, Luo T",
+      "title": "A deep neural network interatomic potential for studying thermal conductivity of beta-Ga2O3",
+      "venue": "Applied Physics Letters",
+      "year": "2020",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Li2020Ga2O3",
+        "Ga2O3 DNN"
+      ],
+      "unique_id": "paper:10.1063/5.0025051",
+      "note": "宽带隙半导体"
+    },
+    {
+      "id": 20,
+      "key": "Li2020Si",
+      "first_author": "Li",
+      "authors": "Li R, Lee E, Luo T",
+      "title": "A unified deep neural network potential capable of predicting thermal conductivity of silicon in different phases",
+      "venue": "Materials Today Physics",
+      "year": "2020",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Li2020Si",
+        "Si multiphase DNN"
+      ],
+      "unique_id": "paper:10.1016/j.mtphys.2020.100181",
+      "note": "多相统一势"
+    },
+    {
+      "id": 21,
+      "key": "Guo2025",
+      "first_author": "Guo",
+      "authors": "Guo Z, Roy Chowdhury P, Han Z, Sun Y, Feng D, Lin G, Ruan X",
+      "title": "Fast and accurate machine learning prediction of phonon scattering rates and lattice thermal conductivity",
+      "venue": "npj Computational Materials",
+      "year": "2025",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Guo2025",
+        "surrogate scattering rates"
+      ],
+      "unique_id": "paper:10.1038/s41524-023-01020-9",
+      "note": "直接回归（对照）"
+    },
+    {
+      "id": 22,
+      "key": "Shi2023",
+      "first_author": "Shi",
+      "authors": "Shi Y, Chen Y, Dong H, Wang H, Qian P",
+      "title": "Investigation of phase transition, mechanical behavior and lattice thermal conductivity of halogen perovskites using machine learning interatomic potentials",
+      "venue": "Physical Chemistry Chemical Physics",
+      "year": "2023",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Shi2023",
+        "halide perovskite NEP"
+      ],
+      "unique_id": "paper:10.1039/d3cp04657e",
+      "note": "钙钛矿/超低导热"
+    },
+    {
+      "id": 23,
+      "key": "Mandal2025",
+      "first_author": "Mandal",
+      "authors": "Mandal S, Srivastava A, Das T, Singh AK, Maiti PK",
+      "title": "Probing lattice anharmonicity and thermal transport in ultralow-kappa materials using machine learning interatomic potentials",
+      "venue": "Small",
+      "year": "2025",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Mandal2025",
+        "ultralow-kappa MLIP"
+      ],
+      "unique_id": "paper:10.1002/smll.202513476",
+      "note": "超低导热强非谐"
+    },
+    {
+      "id": 24,
+      "key": "Mortazavi2020C3N",
+      "first_author": "Mortazavi",
+      "authors": "Mortazavi B, Podryabinkin EV, Novikov IS, Roche S, Rabczuk T, Zhuang X, Shapeev AV",
+      "title": "Efficient machine-learning based interatomic potentials for exploring thermal conductivity in two-dimensional materials",
+      "venue": "Journal of Physics: Materials",
+      "year": "2020",
+      "verify_status": "VERIFIED",
+      "aliases": [
+        "Mortazavi2020C3N",
+        "2D MLIP passive fitting"
+      ],
+      "unique_id": "",
+      "note": "C3N 二维热导"
+    }
+  ]
+}
