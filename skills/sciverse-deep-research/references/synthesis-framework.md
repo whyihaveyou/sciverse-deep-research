@@ -10,7 +10,23 @@
 - **适用条件**：什么条件下成立，已知局限
 - **关系网**：支持/挑战/扩展了谁
 
-不相关的论文整篇丢弃。
+**固定字段名（与子 agent 元数据抽取对齐）**：
+
+```json
+{
+  "paper_key": "[@PatchCore] 或 unique_id",
+  "title": "论文标题",
+  "authors": "第一作者等",
+  "year": "发表年份",
+  "research_question": "1 句话：解决什么问题",
+  "methodology": "1-2 句话：怎么解决的",
+  "key_findings": ["3-5 条 bullet：实际发现"],
+  "limitations": "1-2 句话：作者承认或显而易见的局限",
+  "relation_to_others": "支持/挑战/扩展了哪类工作（含具体 @key）"
+}
+```
+
+批量抽取时（如 orchestration.md 的 subagent batching），子 agent 返回上述 JSON 数组，主 agent 直接用于主题聚类，不二次转述。不相关的论文整篇丢弃。
 
 ### 第二步：主题聚类
 
