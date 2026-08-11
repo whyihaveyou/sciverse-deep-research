@@ -1,0 +1,248 @@
+{
+ "entries": [
+  {
+   "id": 1,
+   "key": "NEP",
+   "first_author": "Fan",
+   "authors": "Z. Fan, Z. Zeng, C. Zhang, Y. Wang, K. Song, H. Dong, Y. Chen, T. Ala-Nissila",
+   "year": "2021",
+   "title": "Neuroevolution machine learning potentials: Combining high accuracy and low cost in atomistic simulations and application to heat transport",
+   "venue": "Phys. Rev. B",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  },
+  {
+   "id": 2,
+   "key": "HDNNP",
+   "first_author": "Minamitani",
+   "authors": "E. Minamitani, M. Ogura, S. Watanabe",
+   "year": "2019",
+   "title": "Simulating lattice thermal conductivity in semiconducting materials using high-dimensional neural network potential",
+   "venue": "Appl. Phys. Express",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  },
+  {
+   "id": 3,
+   "key": "GAP_Si",
+   "first_author": "Qian",
+   "authors": "X. Qian, S. Peng, X. Li, Y. Wei, R. Yang",
+   "year": "2019",
+   "title": "Thermal conductivity modeling using machine learning potentials: Application to crystalline and amorphous silicon",
+   "venue": "Materials Today Physics",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  },
+  {
+   "id": 4,
+   "key": "NNIP_BTE",
+   "first_author": "Choi",
+   "authors": "J. M. Choi, K. Lee, S. Kim, M. Moon, W. Jeong, S. Han",
+   "year": "2022",
+   "title": "Accelerated computation of lattice thermal conductivity using neural network interatomic potentials",
+   "venue": "Computational Materials Science",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  },
+  {
+   "id": 5,
+   "key": "InSe_GKDP",
+   "first_author": "Han",
+   "authors": "J. Han, K. Chen, J. Dai, Q. Zeng, X. Yu",
+   "year": "2023",
+   "title": "Lattice thermal conductivity of monolayer InSe calculated by machine learning potential",
+   "venue": "Nanomaterials",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  },
+  {
+   "id": 6,
+   "key": "GrapheneMillionAtom",
+   "first_author": "Zhou",
+   "authors": "X. Zhou, Y. Liu, B. Tang, J. Wang, H. Dong, X. Xiu, S. Chen, Z. Fan",
+   "year": "2024",
+   "title": "Million-atom heat transport simulations of polycrystalline graphene approaching first-principles accuracy enabled by neuroevolution potential on desktop GPUs",
+   "venue": "arXiv (Cornell)",
+   "verify_status": "VERIFIED",
+   "aliases": [
+    "GPUMD"
+   ]
+  },
+  {
+   "id": 7,
+   "key": "SiUnifiedDNN",
+   "first_author": "Li",
+   "authors": "R. Li, E. Lee, T. Luo",
+   "year": "2020",
+   "title": "A unified deep neural network potential capable of predicting thermal conductivity of silicon in different phases",
+   "venue": "Materials Today Physics",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  },
+  {
+   "id": 8,
+   "key": "Ga2O3",
+   "first_author": "Zhang",
+   "authors": "G. Zhang, L. Li, Z. Sun, G. Wu, X. Sun, W. Shen, K. Liang, Z. Zhang, Z. Qi, X. Wang, Z. Sun",
+   "year": "2023",
+   "title": "A neuroevolution potential for predicting the thermal conductivity of alpha-, beta-, and epsilon-Ga2O3",
+   "venue": "Applied Physics Letters",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  },
+  {
+   "id": 9,
+   "key": "AgTl2I3",
+   "first_author": "Cheng",
+   "authors": "R. Cheng, C. Wang, N. Ouyang, X. Shen, Y. Chen",
+   "year": "2025",
+   "title": "Strong crystalline thermal insulation induced by extended antibonding states",
+   "venue": "arXiv",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  },
+  {
+   "id": 10,
+   "key": "DiamaneMTP",
+   "first_author": "Raeisi",
+   "authors": "M. Raeisi, B. Mortazavi, E. V. Podryabinkin, F. Shojaei, X. Zhuang, A. Shapeev",
+   "year": "2020",
+   "title": "High thermal conductivity in semiconducting Janus and non-Janus diamanes",
+   "venue": "Carbon",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  },
+  {
+   "id": 11,
+   "key": "Mg2GeSe4",
+   "first_author": "You",
+   "authors": "H.-J. You, Y.-T. Chiang, A. Bansil, H. Lin",
+   "year": "2024",
+   "title": "Effects of four-phonon scattering and wave-like phonon tunneling effects on thermoelectric properties of Mg2GeSe4 using machine learning",
+   "venue": "arXiv (Cornell)",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  },
+  {
+   "id": 12,
+   "key": "eMTP",
+   "first_author": "Srinivasan",
+   "authors": "P. Srinivasan, D. Demuriya, B. Grabowski, A. Shapeev",
+   "year": "2024",
+   "title": "Electronic moment tensor potentials include both electronic and vibrational degrees of freedom",
+   "venue": "npj Computational Materials",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  },
+  {
+   "id": 13,
+   "key": "ForceCorr",
+   "first_author": "Wu",
+   "authors": "X. Wu, W. Zhou, H. Dong, P. Ying, Y. Wang, B. Song, Z. Fan, S. Xiong",
+   "year": "2024",
+   "title": "Correcting force error-induced underestimation of lattice thermal conductivity in machine learning molecular dynamics",
+   "venue": "J. Chem. Phys.",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  },
+  {
+   "id": 14,
+   "key": "GaN_ForceErr",
+   "first_author": "Chen",
+   "authors": "Z. Chen, Y. Yuan, W. Ding, S. Li, M. An, G. Zhang",
+   "year": "2025",
+   "title": "Hyperparameter optimization and force error correction of neuroevolution potential for predicting thermal conductivity of wurtzite GaN",
+   "venue": "arXiv",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  },
+  {
+   "id": 15,
+   "key": "IFC_accuracy",
+   "first_author": "Xie",
+   "authors": "H. Xie, X. Gu, H. Bao",
+   "year": "2017",
+   "title": "Effect of the accuracy of interatomic force constants on the prediction of lattice thermal conductivity",
+   "venue": "Computational Materials Science",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  },
+  {
+   "id": 16,
+   "key": "FengRuan4ph",
+   "first_author": "Feng",
+   "authors": "T. Feng, X. Ruan",
+   "year": "2016",
+   "title": "Quantum mechanical prediction of four-phonon scattering rates and reduced thermal conductivity of solids",
+   "venue": "Phys. Rev. B",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  },
+  {
+   "id": 17,
+   "key": "MoS2Revisit",
+   "first_author": "Kocabas",
+   "authors": "T. Kocabas, M. Keceli, T. Gurel, M. Milosevic, C. Sevik",
+   "year": "2025",
+   "title": "Thermal conductivity limits of MoS2 and MoSe2: Revisiting high-order anharmonic lattice dynamics with machine learning potentials",
+   "venue": "arXiv",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  },
+  {
+   "id": 18,
+   "key": "SiDiamondITC",
+   "first_author": "Rajabpour",
+   "authors": "A. Rajabpour, B. Mortazavi, P. Mirchi, J. El Hajj, Y. Guo, X. Zhuang, S. Merabia",
+   "year": "2024",
+   "title": "Accurate estimation of interfacial thermal conductance between silicon and diamond enabled by a machine learning interatomic potential",
+   "venue": "arXiv (Cornell)",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  },
+  {
+   "id": 19,
+   "key": "MiniReview",
+   "first_author": "Luo",
+   "authors": "Y. Luo, M. Li, H. Yuan, H. Liu, Y. Fang",
+   "year": "2023",
+   "title": "Predicting lattice thermal conductivity via machine learning: A mini review",
+   "venue": "npj Computational Materials",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  },
+  {
+   "id": 20,
+   "key": "MSEreview",
+   "first_author": "Qian",
+   "authors": "X. Qian, R. Yang",
+   "year": "2021",
+   "title": "Machine learning for predicting thermal transport properties of solids",
+   "venue": "Materials Science and Engineering: R: Reports",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  },
+  {
+   "id": 21,
+   "key": "CarbonDensity",
+   "first_author": "Wang",
+   "authors": "Y. Wang, Z. Fan, P. Qian, M. A. Caro, T. Ala-Nissila",
+   "year": "2024",
+   "title": "Density dependence of thermal conductivity in nanoporous and amorphous carbon with machine-learned molecular dynamics",
+   "venue": "arXiv",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  },
+  {
+   "id": 22,
+   "key": "SelRules",
+   "first_author": "Ravichandran",
+   "authors": "N. K. Ravichandran, D. Broido",
+   "year": "2020",
+   "title": "Phonon-phonon interactions in strongly bonded solids: Selection rules and higher-order processes",
+   "venue": "Phys. Rev. X",
+   "verify_status": "VERIFIED",
+   "aliases": []
+  }
+ ]
+}
