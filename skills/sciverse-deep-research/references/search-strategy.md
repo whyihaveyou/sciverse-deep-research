@@ -51,6 +51,33 @@
 
 每个模式至少试一轮。在多视角检索中，每个视角用 1-2 种模式构造关键词，3-5 个视角 × 每视角 2 轮 = 若干轮检索调用。具体次数不设上限，以覆盖充分为准。
 
+## 裁判型文献定向检索
+
+综述质量的天花板常被"谁能找到批判、边界、失效分析类文献"决定。这类文献不只在摘要里写"we improve X"，而是回答"X 何时失效 / 为何被高估 / 系统误差从哪来"。每个子主题至少尝试一次裁判型文献定向检索，把结果写入检索日志，即使未命中也要记录"本主题未找到明确裁判型文献"。
+
+**语义检索探针（`semantic_search`，quality 模式）**：用质疑句式直接搜，不要只搜正面陈述。
+- `"limitations of {方法名} for {目标物理量}"`
+- `"when {方法名} fails" / `"breakdown of {方法名}"`
+- `"systematic error in {测量/计算方法}"`
+- `"force error thermal conductivity machine learning potential"`（本主题示例）
+- `"four-phonon scattering overestimated" / `"revisiting four-phonon"`
+- `"is {方法名} reliable for {体系特征}"`
+
+**结构化关键词探针（`search_papers`）**：把质疑词与核心概念组合成 BM25 query。
+- `{核心方法} + "systematic error"`
+- `{核心方法} + "underestimation" / "overestimation"`
+- `{核心方法} + "critique" / "criticism" / "limitation"`
+- `{核心方法} + "vs" + {对照方法}`（常用于挖出对比/裁判型工作）
+- `{核心物理量} + "benchmark" + "failure mode"`
+
+**滚雪球中的裁判型分支**：对高被引种子论文，不要只顺着后继工作找"应用"，也要找"质疑"。
+- `list_paper_relations` relation=CITATIONS 拿到后继引用后，用 `search_papers` 加 query `"limitations"` / `"critique"` / `"re-examination"` 过滤该引用集（或用 `filters_advanced` 反查 `references_unique_id`，再叠加上述关键词）。
+- 对里程碑方法（如 DeePMD-kit、NEP、MTP），定向搜 `"{方法名} force error"`、`"{方法名} thermal conductivity accuracy"`、`"{方法名} benchmark"`。
+
+**裁判型文献的快速识别**：读摘要时优先抓以下信号词——"systematic underestimation"、"overestimation"、"breakdown"、"failure mode"、"limitations"、"revisit"、"re-examine"、"contradict"、"challenges the assumption"、"questions the validity"。
+
+**纳入优先级**：裁判型文献即便方法小众，只要它针对的是本主题核心方法/结论的边界，优先纳入并分配到综合阶段的"矛盾呈现 / 分歧裁决"环节，而不是作为普通相关工作罗列。
+
 ## Web 全文读取
 
 检索工具（网页检索 / web search）返回的命中，**必须读取全文正文而非只看 snippet**——snippet 常截断、易断章取义，撑不起引述与判断。规则：
@@ -90,6 +117,7 @@
 - 时效探针已执行：是/否（窗口：YYYY-MM-DD 至 YYYY-MM-DD）
 - 多源覆盖：sciverse / arXiv / OpenAlex / 网页核验 各已执行：是/否
 - 盲区检查：已列出 K 个已知盲区
+- **裁判型文献定向检索：每个子主题至少执行一次，记录命中/未命中：是/否**
 - 是否进入阶段二：是 / 继续补搜（理由）
 ```
 
