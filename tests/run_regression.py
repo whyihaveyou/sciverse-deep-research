@@ -70,6 +70,18 @@ def _selftest_verify():
     return code == 0, last_line(out)
 
 
+@check("orchestrator 审查员深测 T1-T5（流转/条件边/续跑/schema/乐观锁）")
+def _orchestrator_deep_test():
+    # 审查员 5 类状态机深测：以真实 orchestrator 接口为被测对象（黑盒），
+    # 独立脚本 exit 0/1；与其它 --selftest 用例同一「可复现命令+退出码断言」模式。
+    p = subprocess.run(
+        [sys.executable, os.path.join(ROOT, "tests", "test_orchestrator.py")],
+        cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    out = p.stdout.strip().splitlines()
+    detail = last_line(p.stdout) if p.stdout else f"exit={p.returncode}"
+    return p.returncode == 0, detail
+
+
 @check("spectral-demo 台账 validate = FAIL 0")
 def _ledger_validate():
     code, out = run_script(
