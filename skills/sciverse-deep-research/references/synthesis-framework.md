@@ -188,7 +188,7 @@ A 说 X 有效、B 说 X 无效时：
 
 ### 输出格式（固定，可判定）
 
-在 `draft.md` 当前章节末尾追加一个固定字段的代码块：
+将本节审稿块追加到 `.workflow/section_reviews.md`（固定文件名，不得并入 `draft.md`），格式为固定字段代码块：
 
 ```markdown
 ```section_review: 分支 X / 综合讨论 / 结论
@@ -217,7 +217,7 @@ A 说 X 有效、B 说 X 无效时：
 
 ### 与交付物的关系
 
-`section_review` 块是**内部审计工件**，保留在 `draft.md` 中，**compile 时不进入 `final.md`**，也**不得因为"担心污染交付物"而在 compile 前删除**。它把 `check_report.py` 的引用/洞见检查点前移到写作阶段，减少最终门禁返工。若 `draft.md` 中找不到 section_review 块，视为阶段二未按流程执行。
+`section_reviews.md` 是**内部审计工件**，**不进入 `final.md` 或 `draft.md`**，也**不得因为"担心污染交付物"而在 compile 前删除**。它把 `check_report.py` 的引用/洞见检查点前移到写作阶段，减少最终门禁返工。若 `.workflow/section_reviews.md` 不存在或为空，`check_report.py` 会报 WARN（`--strict-process` 时升 FAIL）。
 
 ## Related Work 思维骨架（每节必过）
 

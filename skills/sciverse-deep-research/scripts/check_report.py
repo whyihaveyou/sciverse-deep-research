@@ -49,8 +49,10 @@ import argparse
 import difflib
 import io
 import json
+import os
 import re
 import sys
+import tempfile
 
 LEDGER_MARK = "【题录核验台账】"
 
@@ -643,6 +645,49 @@ def check_statements(f, report_text, ledger_text, refs):
                 f.add("WARN", "全称量词", f"L{no} 存在二手/未核验项时使用全称量词：{line.strip()[:48]}…")
 
 
+def infer_workflow_dir(report_path):
+    """从报告路径推断 .workflow/ 目录；报告通常在 .workflow/ 内或其旁。"""
+    if not report_path:
+        return None
+    report_path = os.path.abspath(report_path)
+    parent = os.path.dirname(report_path)
+    if os.path.basename(parent) == ".workflow":
+        return parent
+    sibling = os.path.join(parent, ".workflow")
+    if os.path.isdir(sibling):
+        return sibling
+    return None
+
+
+def check_process_artifacts(f, workflow_dir, strict=False):
+    """检查阶段一/阶段二的过程工件：section_reviews.md 与 evidence_compress.md。
+    默认 WARN（兼容旧 demo 无工件），--strict-process 时升 FAIL。
+    这是 harness 架构"prompt 触顶→程序级闸口"的最后一跃。"""
+    if not workflow_dir or not os.path.isdir(workflow_dir):
+        return
+    level = "FAIL" if strict else "WARN"
+    for fname, label in (("section_reviews.md", "结构化自批判"),
+                         ("evidence_compress.md", "证据压缩")):
+        path = os.path.join(workflow_dir, fname)
+        if not os.path.exists(path):
+            f.add(level, "过程工件", f".workflow/{fname} 不存在——{label}未产出审计痕迹")
+            continue
+        if os.path.getsize(path) == 0:
+            f.add(level, "过程工件", f".workflow/{fname} 为空——{label}审计痕迹未写入实质内容")
+            continue
+        try:
+            with io.open(path, encoding="utf-8") as fi:
+                content = fi.read().strip()
+        except Exception as exc:
+            f.add(level, "过程工件", f".workflow/{fname} 读取失败（{exc}）")
+            continue
+        if not content:
+            f.add(level, "过程工件", f".workflow/{fname} 仅含空白——{label}审计痕迹未写入实质内容")
+            continue
+        if fname == "evidence_compress.md" and not any(m in content for m in ("✅", "⚠️", "❌")):
+            f.add(level, "过程工件", f".workflow/{fname} 缺少 ✅/⚠️/❌ 状态标记——压缩块格式不合规")
+
+
 def _ledger_from_data(data):
     """把台账 JSON 转成 {id: entry}；返回 (dict, failures)。
     门禁侧健壮加载（红队 C3/A5/A6）：坏台账必须产出诊断 FAIL 并挡下交付——
@@ -674,7 +719,8 @@ def _ledger_from_data(data):
 
 # ---------------- driver ----------------
 
-def run_checks(report_text, ledger_extra="", mode="auto", citation_ledger=None, terms=None):
+def run_checks(report_text, ledger_extra="", mode="auto", citation_ledger=None, terms=None,
+             workflow_dir=None, process_strict=False):
     f = Findings()
     embedded = LEDGER_MARK in report_text
     if mode == "auto":
@@ -698,6 +744,7 @@ def run_checks(report_text, ledger_extra="", mode="auto", citation_ledger=None, 
     check_mode_structure(f, mode, report_text, refs, ledger_text)
     if mode == "strict":
         check_statements(f, report_text, ledger_text, refs)
+    check_process_artifacts(f, workflow_dir, strict=process_strict)
     return mode, f
 
 
@@ -709,6 +756,8 @@ def main(argv=None):
     ap.add_argument("--mode", choices=["auto", "survey", "strict"], default="auto")
     ap.add_argument("--terms", help="非标准术语小词表 JSON（{\"fail\": {\"词\": \"建议\"}, \"warn\": {...}}），覆盖默认")
     ap.add_argument("--export-clean", help="交付默认出数学干净 md（normalize 后）的输出路径；final.md 仍是事实源")
+    ap.add_argument("--strict-process", action="store_true",
+                    help="过程工件（section_reviews.md / evidence_compress.md）缺失/为空时升 FAIL（默认 WARN）")
     ap.add_argument("--selftest", action="store_true")
     args = ap.parse_args(argv)
 
@@ -743,7 +792,9 @@ def main(argv=None):
                 print(f"[FAIL] 台账校验: {x}")
             print(f"summary: FAIL {len(lfails)} / WARN 0 / INFO 0")
             return 1
-    mode, f = run_checks(text, extra, args.mode, cledger, terms)
+    workflow_dir = infer_workflow_dir(args.report)
+    mode, f = run_checks(text, extra, args.mode, cledger, terms,
+                         workflow_dir=workflow_dir, process_strict=args.strict_process)
     print(f"== check_report ==  mode: {mode}")
     print(f.render())
     if args.export_clean:
@@ -1109,6 +1160,40 @@ d_s = index.query(x^2)  # 代码块内不判
            "O2：export-clean 输出数学干净（裸公式焊接成 $...$）")
     expect("[1]" in clean and "V, 2020" in clean,
            "O2：export-clean 不改引用编号/参考文献（compile 链路不受影响）")
+
+    # 过程工件闸口（P0/P1 程序级硬化）
+    with tempfile.TemporaryDirectory() as tmp:
+        wf = os.path.join(tmp, ".workflow")
+        os.makedirs(wf)
+        report = os.path.join(wf, "final.md")
+        with io.open(report, "w", encoding="utf-8") as fo:
+            fo.write("# 综述\n正文[1]。\n## 参考文献\n[1] A, \"T,\" V, 2020.\n")
+        # 无工件：默认 WARN
+        mode, f = run_checks("# 综述\n正文[1]。\n## 参考文献\n[1] A, \"T,\" V, 2020.\n",
+                             mode="survey", workflow_dir=wf, process_strict=False)
+        expect(any(c == "过程工件" and l == "WARN" for l, c, _ in f.items),
+               "过程工件：缺失时默认 WARN（兼容旧 demo）")
+        # 无工件：strict FAIL
+        mode, f = run_checks("# 综述\n正文[1]。\n## 参考文献\n[1] A, \"T,\" V, 2020.\n",
+                             mode="survey", workflow_dir=wf, process_strict=True)
+        expect(any(c == "过程工件" and l == "FAIL" for l, c, _ in f.items),
+               "过程工件：--strict-process 缺失时升 FAIL")
+        # 有工件：零 FAIL
+        with io.open(os.path.join(wf, "section_reviews.md"), "w", encoding="utf-8") as fo:
+            fo.write("```section_review: 分支一\n- claims_verification: ...\n```\n")
+        with io.open(os.path.join(wf, "evidence_compress.md"), "w", encoding="utf-8") as fo:
+            fo.write("## 压缩块\n- [@Korotaev2019]: ✅ 已确认可用\n")
+        mode, f = run_checks("# 综述\n正文[1]。\n## 参考文献\n[1] A, \"T,\" V, 2020.\n",
+                             mode="survey", workflow_dir=wf, process_strict=True)
+        expect(f.count("FAIL") == 0 and not any(c == "过程工件" for _, c, _ in f.items),
+               "过程工件：存在且合规时 strict 也不触发")
+        # evidence_compress 缺标记
+        with io.open(os.path.join(wf, "evidence_compress.md"), "w", encoding="utf-8") as fo:
+            fo.write("## 压缩块\n- 无状态标记\n")
+        mode, f = run_checks("# 综述\n正文[1]。\n## 参考文献\n[1] A, \"T,\" V, 2020.\n",
+                             mode="survey", workflow_dir=wf, process_strict=False)
+        expect(any(c == "过程工件" and "缺少 ✅" in m for _, c, m in f.items),
+               "过程工件：evidence_compress 缺 ✅/⚠️/❌ 标记触发 WARN")
 
     print("SELFTEST " + ("PASS" if ok else "FAIL"))
     return 0 if ok else 1

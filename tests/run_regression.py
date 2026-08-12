@@ -90,14 +90,58 @@ def _ledger_validate():
     return code == 0 and "FAIL 0" in out, out.strip()
 
 
-@check("dft-kL-demo 交付门禁 = FAIL 0 / WARN 0")
+@check("dft-kL-demo 交付门禁 = FAIL 0（过程工件兼容 WARN 不计入失败）")
 def _delivery_gate():
     code, out = run_script(
         "check_report.py", "examples/dft-kL-demo/.workflow/final.md",
         "--citation-ledger",
         "examples/dft-kL-demo/.workflow/citation_ledger.json.delivery.json")
-    ok = code == 0 and "FAIL 0" in out and "WARN 0" in out
+    # 旧 demo 无 section_reviews.md / evidence_compress.md，默认产生过程工件 WARN；
+    # 只要 FAIL 0 且非过程工件项无 WARN 即算通过。
+    non_process_warns = [line for line in out.splitlines()
+                         if line.startswith("[WARN]") and "过程工件" not in line]
+    ok = code == 0 and "FAIL 0" in out and len(non_process_warns) == 0
     return ok, last_line(out)
+
+
+@check("check_report 过程工件闸口：默认 WARN 兼容旧 demo")
+def _process_artifacts_warn_default():
+    with tempfile.TemporaryDirectory() as td:
+        wf = os.path.join(td, ".workflow")
+        os.makedirs(wf)
+        report = os.path.join(wf, "final.md")
+        with open(report, "w", encoding="utf-8") as f:
+            f.write("# 综述\n正文[1]。\n## 二、研究方法\n滚雪球 1 轮，末轮新增 0 篇，达检索饱和。\n## 参考文献\n[1] A, \"T,\" V, 2020.\n")
+        code, out = run_script("check_report.py", report, "--mode", "survey")
+        return code == 0 and "过程工件" in out, last_line(out)
+
+
+@check("check_report 过程工件闸口：--strict-process 缺失 FAIL")
+def _process_artifacts_strict_fail():
+    with tempfile.TemporaryDirectory() as td:
+        wf = os.path.join(td, ".workflow")
+        os.makedirs(wf)
+        report = os.path.join(wf, "final.md")
+        with open(report, "w", encoding="utf-8") as f:
+            f.write("# 综述\n正文[1]。\n## 二、研究方法\n滚雪球 1 轮，末轮新增 0 篇，达检索饱和。\n## 参考文献\n[1] A, \"T,\" V, 2020.\n")
+        code, out = run_script("check_report.py", report, "--mode", "survey", "--strict-process")
+        return code == 1 and "过程工件" in out, last_line(out)
+
+
+@check("check_report 过程工件闸口：合规工件通过")
+def _process_artifacts_present_ok():
+    with tempfile.TemporaryDirectory() as td:
+        wf = os.path.join(td, ".workflow")
+        os.makedirs(wf)
+        report = os.path.join(wf, "final.md")
+        with open(report, "w", encoding="utf-8") as f:
+            f.write("# 综述\n正文[1]。\n## 二、研究方法\n滚雪球 1 轮，末轮新增 0 篇，达检索饱和。\n## 参考文献\n[1] A, \"T,\" V, 2020.\n")
+        with open(os.path.join(wf, "section_reviews.md"), "w", encoding="utf-8") as f:
+            f.write("```section_review: 分支一\n- claims_verification: ...\n```\n")
+        with open(os.path.join(wf, "evidence_compress.md"), "w", encoding="utf-8") as f:
+            f.write("## 压缩块\n- [@A]: ✅ 已确认可用\n")
+        code, out = run_script("check_report.py", report, "--mode", "survey", "--strict-process")
+        return code == 0 and "过程工件" not in out, last_line(out)
 
 
 @check("space-compute-demo 台账 validate = FAIL 0")
@@ -108,7 +152,7 @@ def _sc_ledger_validate():
     return code == 0 and "FAIL 0" in out, out.strip()
 
 
-@check("space-compute-demo 交付门禁 = FAIL 0 / WARN 0")
+@check("space-compute-demo 交付门禁 = FAIL 0（过程工件兼容 WARN 不计入失败）")
 def _sc_delivery_gate():
     code, out = run_script(
         "check_report.py", "examples/space-compute-demo/.workflow/final.md",
@@ -116,7 +160,9 @@ def _sc_delivery_gate():
         # 用已跟踪的 output delivery（.workflow/*.delivery.json 被 gitignore/未跟踪，
         # clean clone 里不存在，门禁必须引用入仓的 output/引用台账_delivery.json）
         "examples/space-compute-demo/output/引用台账_delivery.json")
-    ok = code == 0 and "FAIL 0" in out and "WARN 0" in out
+    non_process_warns = [line for line in out.splitlines()
+                         if line.startswith("[WARN]") and "过程工件" not in line]
+    ok = code == 0 and "FAIL 0" in out and len(non_process_warns) == 0
     return ok, last_line(out)
 
 
