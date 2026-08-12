@@ -174,6 +174,51 @@ A 说 X 有效、B 说 X 无效时：
 
 多解竞争草稿是内部审计工件，不进入交付综述正文； Selector 定稿的结论作为该分支最终洞见，按正常流程写入分支章节。
 
+## 结构化草稿审稿（section_review）
+
+综合阶段每完成一节正文草稿后、进入下一节前，必须执行一次结构化审稿并产出**强制可观测工件**。这是把 EvoMaster 的 trace→analyze→patch 循环和 ML-Master 的 `review_func_spec` 迁移到综述写作：不依赖模型自觉，而是把 critique 写成固定格式代码块，留在 `draft.md` 中作为审计痕迹。
+
+### 触发时机（硬性）
+
+- 每个分支章节写完后；
+- 综合讨论、开放问题、结论写完后；
+- 若章节较长（>800 中文字符或含 3 个以上 claim），可在小节末尾追加一次 mid-section review。
+
+**未产出 section_review 块不得进入下一节。**
+
+### 输出格式（固定，可判定）
+
+在 `draft.md` 当前章节末尾追加一个固定字段的代码块：
+
+```markdown
+```section_review: 分支 X / 综合讨论 / 结论
+- claims_verification:
+  - claim_1: "..." → supported_by: [@键1][@键2]; status: 直接支持/弱支持/无支持
+  - claim_2: "..." → supported_by: [@键3]; status: ...
+- L3_L4_verdict:
+  - 本节最高洞见等级：L1/L2/L3/L4（按 insight-protocol.md）
+  - L3/L4 级洞见原文（若有）："..."
+- evidence_gaps:
+  - 反向证据或限定条件：...（无则写"无"）
+  - 需补搜/对读才能确认的 claim：...
+  - 需降级表述的 claim：...
+- patch_plan: 无需修订 / 补搜 X / 改写 Y / 删除 Z / 启用 Mini scattered-and-stacked
+```
+```
+
+### 判定规则（全部满足方可进入下一节）
+
+1. `claims_verification` 列出本节每个实质 claim；每个 claim 至少有一个 `直接支持` 的引用键；`弱支持`/`无支持` 的 claim 必须在 `patch_plan` 中说明如何补强或降级。
+2. `L3_L4_verdict` 明确本节最高洞见等级；分支章节必须至少含 1 条 L3/L4 级洞见，否则 `patch_plan` 必须是"补搜裁判型文献"或"启用 Mini scattered-and-stacked"，不允许写"无需修订"。
+3. `evidence_gaps` 不得为空或写"无缺口"来敷衍； genuinely 无缺口时写"已覆盖"并给出理由。
+4. `patch_plan` 具体可执行；需要补搜时必须写明关键词/检索工具/预期填补的 claim。
+
+**未通过审稿**：按 `patch_plan` 回阶段一补搜、或在本节内改写、或启用 Mini scattered-and-stacked 多解竞争；不允许带病推进。
+
+### 与交付物的关系
+
+`section_review` 块是**内部审计工件**，保留在 `draft.md` 中，**compile 时不进入 `final.md`**，也**不得因为"担心污染交付物"而在 compile 前删除**。它把 `check_report.py` 的引用/洞见检查点前移到写作阶段，减少最终门禁返工。若 `draft.md` 中找不到 section_review 块，视为阶段二未按流程执行。
+
 ## Related Work 思维骨架（每节必过）
 
 写每个主题章节前，脑子里过一遍：

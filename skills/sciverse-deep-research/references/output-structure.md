@@ -113,6 +113,18 @@
  RQ3 的回答：...
  最后一段：本综述的核心贡献（新角度/新发现/新框架）]
 
+## 十、调研成本（最终交付视图必须包含）
+
+[在最终交付视图（export-clean）末尾追加一个小节，记录本次调研的效率足迹。至少包含以下可判定字段：
+- 总检索调用次数：N（search_papers / semantic_search / list_paper_relations 各多少）
+- 入选并纳入台账的文献数：M
+- 核验通过率：X/Y
+- 检索轮次 / 滚雪球轮次：R
+- wall-clock 用时（如环境可提供）：T
+- 估计总 token 数（如环境可提供）：Tokens
+
+**纪律**：本小节缺失视为 output-structure 未达标；确实无法提供 token/ wall-clock 时写"未记录"，但不能省略整个小节。作用：让用户对成本透明，也为后续模型/参数/流程优化提供可对比的基线。]
+
 ## 参考文献
 
 [1] Author1, Author2, et al., "Title," Venue, Year.
