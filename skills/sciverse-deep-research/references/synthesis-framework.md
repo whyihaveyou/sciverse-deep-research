@@ -22,9 +22,14 @@
   "methodology": "1-2 句话：怎么解决的",
   "key_findings": ["3-5 条 bullet：实际发现"],
   "limitations": "1-2 句话：作者承认或显而易见的局限",
-  "relation_to_others": "支持/挑战/扩展了哪类工作（含具体 @key）"
+  "relation_to_others": "支持/挑战/扩展了哪类工作（含具体 @key）",
+  "evidence_chunks": [
+    {"doc_id": "...", "offset": 0, "quote": "支持核心发现的一句原文"}
+  ]
 }
 ```
+
+`evidence_chunks` 是可选但强烈建议的字段：记录 1-3 条支持该论文核心发现的原文章节（doc_id + offset + 短引文）。它把 SurveyMaster 的"段落级 citation grounding" 落地为可检查的中间产物——综合阶段写 claim 时可直接引用这些片段，减少张冠李戴。
 
 批量抽取时（如 orchestration.md 的 subagent batching），子 agent 返回上述 JSON 数组，主 agent 直接用于主题聚类，不二次转述。不相关的论文整篇丢弃。
 
@@ -56,6 +61,18 @@
 > While Smith et al. [1] and Lee et al. [2] both target task X, they take fundamentally different approaches: Smith et al. leverage retrieval augmentation, achieving 85%, whereas Lee et al. rely on in-context learning, reaching 87% but at 3x the inference cost. Notably, Wang et al. [3] show that the retrieval-based strategy generalizes better to the related task Y, suggesting broader applicability despite the lower headline number.
 
 **规则**：每个主题段落至少一个句子同时引用并对比 2+ 篇论文。
+
+## 段落级 citation grounding
+
+综述的每个 claim 段落、每个结构性元素都必须能被读者追溯到具体来源。执行纪律：
+
+- **claim 段落 ≥1 个引用**：除明确的过渡/ framing 段落外，任何包含实质判断、数值、方法描述或归因的段落都必须带有 `[编号]` 引用。
+- **结构性元素点名必引用**：关键引用节、核心要点 bullet、分类框架表/对比表的单元格、研究方法中的关键词族，凡出现具体论文/系统/方法/材料名，同行或同条必须带 `[编号]`；禁止把方法/材料名当普通名词裸放在这些结构里。
+- **无引用段落显式标注**：若某段确实只是过渡句，必须在段首或段尾标注 `[无引用：过渡句]`，否则视为 citation grounding 失败。
+- **引述不悬空**："多项研究表明..." 这类无名声明必须给出具体文献；无法给出时改为"目前证据尚不足以点名具体研究"，禁止用模糊概括冒充共识。
+- **证据片段可回查**：对关键 claim，优先引用 `evidence_chunks` 中记录的 doc_id+offset；引述准确性核验时直接对读原文切片。
+
+这是把 SciMaster/SurveyMaster "section-wise generation with explicit citation linking" 落到本地 skill 的写作纪律：不需要专有 citation graph，只靠"每段有源、每源可核验"。
 
 ## 对比表设计
 
@@ -101,6 +118,61 @@ A 说 X 有效、B 说 X 无效时：
 4. 不能判断 → "目前证据不足以判断，需在 W 条件下验证"
 
 **不要**：写"存在争议"然后跳过；平均掉矛盾；只引支持一方的文献。
+
+## Mini scattered-and-stacked 深度合成
+
+当某个分支按常规三步法仍无法产出 L3/L4 级洞见（或面对明显矛盾却难以裁决）时，
+借用 X-Master 的 **Solver / Critic / Rewriter / Selector** 工作流做一次小范围多解竞争。
+**关键：这不是在脑中完成的抽象角色扮演，而是必须产出可审计的中间工件。**
+
+### 触发条件（满足其一才触发）
+
+- 分支洞见自检最高只有 L2，且回阶段一补搜后仍无法提升到 L3/L4；
+- 分支内存在硬矛盾，常规裁决程序（列调节变量 → 建证据表 → 给条件化立场/证据缺口）走不下去；
+- 用户 angle 或 RQ 依赖该分支必须给出机制级判断，不能简单带过。
+
+**不滥用**：证据清晰、L3/L4 已经足够的分支不需要走此流程，避免不必要的成本。
+
+### 执行格式：在 draft.md 中插入显式小节
+
+触发后，在当前分支的 `draft.md` 键值草稿末尾追加一个**多解竞争草稿**小节，使用以下固定小标题，保证可观测、可审计：
+
+```markdown
+#### 多解竞争草稿（分支 X：XXX 主题）
+
+##### 候选解读 A
+- 核心 claim：...
+- 支撑文献：[@键1][@键2]
+- 解释逻辑：...
+
+##### 候选解读 B
+- 核心 claim：...
+- 支撑文献：[@键3][@键4]
+- 解释逻辑：...
+
+##### Critic 批判
+- 候选 A 的问题：...
+- 候选 B 的问题：...
+- 共同盲区：...
+
+##### Rewriter 综合
+- 吸收 A/B 的合理部分后，更优的解读是：...
+- 对矛盾的处理（条件化裁决 / 证据缺口）：...
+
+##### Selector 定稿
+- 最终选择：...
+- 选择理由（匹配度 / 推理链 / 限定条件）：...
+```
+
+**要求**：
+- 每个候选解读必须明确核心 claim 和 2-3 篇关键文献；
+- Critic 必须指出每个候选的**致命缺陷**或**不可修正之处**；
+- Rewriter 必须处理矛盾，不能和稀泥；
+- Selector 必须给出明确选择及理由，选择标准：与证据的匹配度 > 观点新颖度 > 表达流畅度。
+
+### 与最终交付物的关系
+
+多解竞争草稿是内部审计工件，不进入交付综述正文； Selector 定稿的结论作为该分支最终洞见，按正常流程写入分支章节。
 
 ## Related Work 思维骨架（每节必过）
 

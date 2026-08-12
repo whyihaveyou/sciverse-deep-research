@@ -29,6 +29,21 @@
 - S3 辐射与可靠性
 - S4 材料与能源解耦路径
 
+**可编辑检索计划**：子问题集确定后，生成 `.workflow/search_plan.md`：
+
+```markdown
+# 检索计划
+- 研究简报 RQ：...
+- 子问题列表：S1...Sn（每句一句话 + 所属视角）
+- 每个子问题的关键词族（≥2 组）
+- 信息源：sciverse / arXiv / OpenAlex / 网页核验
+- 时效窗口：按 search-strategy.md 的时效精度分级为每个子问题选档
+- 检索轮次预算：每子方向 ≤3 轮（初始 + 2 轮补搜）
+- 预期产物：每子问题一份 `subproblems/Si.md`
+```
+
+该计划**人机可编辑**。用户或执行者在 Step 0 / O0 阶段修改后，后续检索必须按修改后的计划执行；若未修改，则按自动生成的计划执行。这是把 SciMaster "人在环中调整任务逻辑" 的做法落到本地 skill 的轻量实现。
+
 ### 阶段 O1：子问题并行深挖
 
 **每个子问题分派一个独立 sub-agent 深挖**（编排 agent 用并行委托机制/spawn、
@@ -74,6 +89,9 @@ research-depth.md 第 1 条"无损证据合并稿"）：
 - 时效探针：每个子问题一轮近 6-12 个月限定检索，记录命中；
 - **反思问题**：这份合并稿里，"缺哪篇 / 哪句无出处 / 哪里矛盾"——回答不了的
   转化为证据缺口，写到开放问题，不许删。
+- **意图演化日志**：每轮补搜后必须追加 `.workflow/intent_evolution_log.md` 一条记录：
+  - `round`、针对的子问题、本轮 evidence、发现的缺口、`updated_intent`、`updated_checklist`、是否继续补搜。
+  - 日志是 O3 多轮收敛的审计轨迹，也是后续综合阶段判断"为什么漏掉某方向"的依据。
 - 收敛判据：补搜一轮零新增且各子方向 ≥3 篇 → 进入编号冻结。
 
 ### 阶段 O4：移交下游
@@ -81,6 +99,12 @@ research-depth.md 第 1 条"无损证据合并稿"）：
 把合并稿（已含 taxonomy 归位）作为**阶段二综合的输入**，进入既有流程：
 编号冻结（铸台账）→ 键值草稿 → compile → check_report。合并稿淘汰：综合阶段以
 合并稿为证据地基，不重新检索。
+
+**进入综合阶段时的特殊路由**：若某 taxonomy 分支在初稿后仍无法产出 L3/L4 级洞见，
+启用 `references/synthesis-framework.md` 的 **Mini scattered-and-stacked 深度合成**：
+对该分支生成 2-3 个候选解读 → Critic 批判 → Rewriter 综合 → Selector 定稿。
+该流程 borrowed from X-Master 的 Solver/Critic/Rewriter/Selector，用于在证据不足或观点分歧时
+把洞见深度"赚到"，而不是原样放低标准交付。
 
 ## 子问题执行纪律（防止步骤性质混淆）
 
@@ -122,7 +146,10 @@ research-depth.md 第 1 条"无损证据合并稿"）：
   "methodology": "1-2 句话",
   "key_findings": ["3-5 条 bullet"],
   "limitations": "1-2 句话",
-  "relation_to_others": "支持/挑战/扩展了哪类工作"
+  "relation_to_others": "支持/挑战/扩展了哪类工作",
+  "evidence_chunks": [
+    {"doc_id": "...", "offset": 0, "quote": "支持核心发现的一句原文"}
+  ]
 }
 ```
 
