@@ -64,9 +64,9 @@ cd sciverse-deep-research && ./install.sh
 
 | Agent | 适配文档 | 端到端验证 |
 |---|---|---|
-| Hermes | [agents/hermes.md](agents/hermes.md) | 项目早期基准 |
+| Hermes | [agents/hermes.md](agents/hermes.md) | 2026-08-13，产物 [examples/hermes-spectral-dimension-demo/](examples/hermes-spectral-dimension-demo/) |
 | Kimi Code | [agents/kimi-code.md](agents/kimi-code.md) | 2026-08-11，产物 [examples/kimi-mlp-kL-demo/](examples/kimi-mlp-kL-demo/) |
-| OpenCode | [agents/opencode.md](agents/opencode.md) | 2026-08-11，产物 [examples/opencode-mlp-kL-demo-v3/](examples/opencode-mlp-kL-demo-v3/) |
+| OpenCode | [agents/opencode.md](agents/opencode.md) | 2026-08-11，产物 [examples/opencode-mlp-kL-demo-v3/](examples/opencode-mlp-kL-demo-v3/)；2026-08-13 谱维数格式轮验证 [examples/opencode-spectral-dimension-demo-v2/](examples/opencode-spectral-dimension-demo-v2/) |
 | Claude Code | [agents/claude-code.md](agents/claude-code.md) | 文档适配，待实测 |
 | Codex | [agents/codex.md](agents/codex.md) | 文档适配，待实测 |
 | Qwen Code | [agents/qwen-code.md](agents/qwen-code.md) | 文档适配，待实测 |
@@ -89,25 +89,32 @@ sciverse-deep-research/
 ├── mcp-server/                      # sciverse-survey-gates：把四个确定性步骤暴露为 MCP 工具
 ├── agents/                          # 7 个 agent 适配文档
 ├── examples/                        # 端到端真实用例
-│   ├── spectral-dimension-demo/     # 6 篇文献小型综述，FAIL 0 / WARN 0
-│   ├── space-compute-demo/          # 14 篇空间算力综述 + PDF
-│   ├── opencode-mlp-kL-demo/        # OpenCode v1 旧版 skill 基线
-│   ├── opencode-mlp-kL-demo-v2/     # DeerFlow 改进后同 prompt 重跑
-│   ├── opencode-mlp-kL-demo-v3/     # 第三轮改进后验证
-│   └── kimi-mlp-kL-demo/            # Kimi Code 对照组
+│   ├── spectral-dimension-demo/              # 6 篇文献小型综述，FAIL 0 / WARN 0
+│   ├── space-compute-demo/                   # 14 篇空间算力综述 + PDF
+│   ├── opencode-mlp-kL-demo/                 # OpenCode v1 旧版 skill 基线
+│   ├── opencode-mlp-kL-demo-v2/              # DeerFlow 改进后同 prompt 重跑
+│   ├── opencode-mlp-kL-demo-v3/              # 第三轮改进后验证
+│   ├── kimi-mlp-kL-demo/                     # Kimi Code 对照组
+│   ├── opencode-sse-ml-demo/                 # 新题泛化：机器学习 × 固态电解质
+│   ├── opencode-spectral-dimension-demo/     # 谱维数 OpenCode v1（格式轮前）
+│   ├── opencode-spectral-dimension-demo-v2/  # 谱维数格式轮验证版
+│   └── hermes-spectral-dimension-demo/       # Hermes 第 4 家 Agent 端到端实证
 ├── AGENT-BOOTSTRAP.md               # Agent-Ready 引导
 ├── HUMAN-QUICKSTART.md              # 人向 Quickstart
 └── install.sh                       # 检测本机 agent → symlink skill → 打印 MCP 配置片段
 ```
 
-## 验证状态（2026-08-11，本机 macOS）
+## 验证状态（2026-08-13，本机 macOS）
 
-- 回归门禁：`python3 tests/run_regression.py` → **PASS 27 / FAIL 0**。
+- 回归门禁：`python3 tests/run_regression.py` → **PASS 40 / FAIL 0**（格式轮新增 13 个格式/过程工件闸口用例）。
 - MCP server：`uv run --project mcp-server python -c "import sciverse_survey_gates"` 通过；stdio 握手返回 `sciverse-survey-gates 3.4.5`。
 - 端到端真实用例：
   - `examples/spectral-dimension-demo/`：sciverse 检索 → 台账 validate → compile → check_report **FAIL 0 / WARN 0**。
   - `examples/opencode-mlp-kL-demo-v3/`：OpenCode + deepseek-chat，22 篇，**FAIL 0 / WARN 1**。
   - `examples/kimi-mlp-kL-demo/`：Kimi Code + ark-code-latest，25 篇，**FAIL 0 / WARN 0**。
+  - `examples/opencode-sse-ml-demo/`：新题泛化（机器学习 × 固态电解质），30 篇，**FAIL 0 / WARN 2**（2 条启发式近邻误报）。
+  - `examples/opencode-spectral-dimension-demo-v2/`：格式轮验证，20 篇，默认/strict-process/strict-format 均为 **FAIL 0 / WARN 0 / INFO 0**。
+  - `examples/hermes-spectral-dimension-demo/`：Hermes 第 4 家 Agent 实证，19 篇，默认/strict-process/strict-format 均为 **FAIL 0 / WARN 0 / INFO 0**。
 - 题录核验：`python3 skills/sciverse-deep-research/scripts/verify_citations.py --probe` 确认 Crossref 在线双向可达（网络正常时）。
 
 ## 已知限制

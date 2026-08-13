@@ -1,0 +1,439 @@
+{
+  "entries": [
+    {
+      "id": 1,
+      "key": "Chen2024",
+      "aliases": [
+        "ISSE"
+      ],
+      "first_author": "Weijian Chen",
+      "title": "Accelerated discovery of novel inorganic solid-state electrolytes through machine learning-assisted hierarchical screening",
+      "venue": "Journal of Alloys and Compounds",
+      "year": "2024",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1016/j.jallcom.2024.177981",
+      "doc_id": "6d01b50cbe4994a1b3e4c348a71efd2d8d8691ba6e226b7cac42b38135e7d853"
+    },
+    {
+      "id": 2,
+      "key": "Zhang2019",
+      "aliases": [],
+      "first_author": "Xu Zhang",
+      "title": "Unsupervised machine learning accelerates solid electrolyte discovery",
+      "venue": "Green Energy & Environment",
+      "year": "2019",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1016/j.gee.2019.12.003",
+      "doc_id": "d58b3a3672496203eb8c109c44c75d5b9ae509bdd97e961022a2d72a58697073"
+    },
+    {
+      "id": 3,
+      "key": "Kang2023",
+      "aliases": [
+        "superionic SSE"
+      ],
+      "first_author": "Seungpyo Kang",
+      "title": "Discovery of Superionic Solid-State Electrolyte for Li-Ion Batteries via Machine Learning",
+      "venue": "The Journal of Physical Chemistry C",
+      "year": "2023",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1021/acs.jpcc.3c02908",
+      "doc_id": "dc1c6c4300421706151b68f22cb6cfc50aee64ab464bb56d743bd835c0f78aa6"
+    },
+    {
+      "id": 4,
+      "key": "Sun2023",
+      "aliases": [
+        "surrogate"
+      ],
+      "first_author": "Jiwon Sun",
+      "title": "Accelerated Discovery of Novel Garnet-Type Solid-State Electrolyte Candidates via Machine Learning",
+      "venue": "ACS Applied Materials & Interfaces",
+      "year": "2023",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1021/acsami.2c15980",
+      "doc_id": "05303df68024dbd9d5f6698d17353e24332ca717bb86e4ae8812816144bf40ac"
+    },
+    {
+      "id": 5,
+      "key": "Sun2025",
+      "aliases": [
+        "CDHE",
+        "CHGNet"
+      ],
+      "first_author": "Jiwon Sun",
+      "title": "Cation-Disordered High-Entropy Garnet Structures as Solid-State Electrolytes for All-Solid-State Batteries: Machine Learning-Driven Discovery",
+      "venue": "ACS Applied Materials & Interfaces",
+      "year": "2025",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1021/acsami.5c09935"
+    },
+    {
+      "id": 6,
+      "key": "Kim2025",
+      "aliases": [
+        "dual-doped LLZO",
+        "HSE",
+        "PVDF-HFP"
+      ],
+      "first_author": "Ji-Hwan Kim",
+      "title": "Machine learning-driven discovery of innovative hybrid solid electrolytes for high-performance all-solid-state batteries",
+      "venue": "Chemical Engineering Journal",
+      "year": "2025",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1016/j.cej.2025.161926"
+    },
+    {
+      "id": 7,
+      "key": "Xiang2025",
+      "aliases": [],
+      "first_author": "Shang Xiang",
+      "title": "Ionic Conductivity Study of Antiperovskite Solid-State Electrolytes Based on Interpretable Machine Learning",
+      "venue": "ACS Applied Energy Materials",
+      "year": "2025",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1021/acsaem.4c02759"
+    },
+    {
+      "id": 8,
+      "key": "Kim2026MTComm",
+      "aliases": [],
+      "first_author": "Younsoo Kim",
+      "title": "Prediction of ionic conductivity in solid-state electrolytes using machine learning",
+      "venue": "Materials Today Communications",
+      "year": "2026",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1016/j.mtcomm.2026.115317",
+      "doc_id": "dc8d59dccaee5759290ace454f2b0779525ea925880c5572eab615120740aa84"
+    },
+    {
+      "id": 9,
+      "key": "Kim2026JCP",
+      "aliases": [],
+      "first_author": "Haewon Kim",
+      "title": "Data-driven prediction of ionic conductivity in solid-state electrolytes with machine learning and large language models",
+      "venue": "The Journal of Chemical Physics",
+      "year": "2026",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1063/5.0307954",
+      "doc_id": "f170edab39cd89c694535db194b37037e0ebe7bd7b7c5f92d2db0d0648dd9749"
+    },
+    {
+      "id": 10,
+      "key": "Paul2025",
+      "aliases": [
+        "LiCondAI"
+      ],
+      "first_author": "Bijan Kumar Paul",
+      "title": "LiCondAI: A Machine Learning Model for Predicting Lithium-Ion Conductivity in Solid Electrolytes",
+      "venue": "Industrial & Engineering Chemistry Research",
+      "year": "2025",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1021/acs.iecr.5c01315"
+    },
+    {
+      "id": 11,
+      "key": "Kong2025",
+      "aliases": [
+        "E2I",
+        "Elements-To-Ionics"
+      ],
+      "first_author": "Songjia Kong",
+      "title": "From Composition to Ionic Conductivity: Machine Learning-Guided Discovery and Experimental Validation of Argyrodite-Type Lithium-Ion Electrolytes",
+      "venue": "Small",
+      "year": "2025",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1002/smll.202509918",
+      "doc_id": "9b4b70baa77d31d5b1dc46ef4cb64d719929fcd2161f5a4c6e3a6fd858d04af0"
+    },
+    {
+      "id": 12,
+      "key": "Choong2025",
+      "aliases": [],
+      "first_author": "Li Yan Anthony Choong",
+      "title": "Discovery of Effective Halide Solid Electrolytes for Solid-State Rechargeable Batteries via Machine Learning and DFT Calculations",
+      "venue": "ACS Applied Energy Materials",
+      "year": "2025",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1021/acsaem.5c03277"
+    },
+    {
+      "id": 13,
+      "key": "Tawfik2025",
+      "aliases": [
+        "Li3YBr6"
+      ],
+      "first_author": "Sherif Abdulkader Tawfik",
+      "title": "Accelerated Discovery of Solid-State Electrolytes Using Bayesian Optimization",
+      "venue": "The Journal of Physical Chemistry C",
+      "year": "2025",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1021/acs.jpcc.5c00954"
+    },
+    {
+      "id": 14,
+      "key": "Rajapriya2026",
+      "aliases": [
+        "cold sintering",
+        "CSP",
+        "LATP"
+      ],
+      "first_author": "Navin Rajapriya",
+      "title": "Bayesian Optimization of Cold Sintering Process for High-Conductivity LATP Solid-State Electrolytes",
+      "venue": "ACS Applied Energy Materials",
+      "year": "2026",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1021/acsaem.6c01362"
+    },
+    {
+      "id": 15,
+      "key": "Chen2025JPS",
+      "aliases": [
+        "LiTi2(PO4)3"
+      ],
+      "first_author": "Xiaozhen Chen",
+      "title": "Machine learning-assisted prediction of ionic conductivity in doped LiTi2(PO4)3 solid electrolytes",
+      "venue": "Journal of Power Sources",
+      "year": "2025",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1016/j.jpowsour.2025.237359"
+    },
+    {
+      "id": 16,
+      "key": "Hajibabaei2021",
+      "aliases": [
+        "SGPR",
+        "universal MLIP",
+        "on-the-fly"
+      ],
+      "first_author": "Amir Hajibabaei",
+      "title": "Universal Machine Learning Interatomic Potentials: Surveying Solid Electrolytes",
+      "venue": "The Journal of Physical Chemistry Letters",
+      "year": "2021",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1021/acs.jpclett.1c01605"
+    },
+    {
+      "id": 17,
+      "key": "Gurwell2026",
+      "aliases": [
+        "uMLIP",
+        "7Li NMR"
+      ],
+      "first_author": "Cameron A. Gurwell",
+      "title": "Experimental Validation of Universal Machine Learning Interatomic Potentials for Lithium-Ion Dynamics in Solid Electrolytes via 7Li NMR",
+      "venue": "ChemRxiv",
+      "year": "2026",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.26434/chemrxiv.15002480/v1",
+      "doc_id": "106eb83d09ecf99d690a3fbb244da83bed19367466b6458f02387045d780e591"
+    },
+    {
+      "id": 18,
+      "key": "Zhang2024",
+      "aliases": [
+        "EANN",
+        "Li3YCl6",
+        "MLMD"
+      ],
+      "first_author": "Yixi Zhang",
+      "title": "Size dependent lithium-ion conductivity of solid electrolytes in machine learning molecular dynamics simulations",
+      "venue": "Artificial Intelligence Chemistry",
+      "year": "2024",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1016/j.aichem.2024.100051",
+      "doc_id": "8b8e2f1d59600c4d2d76617b0be54d94475654bf09a1500345d2ca3b0a5b3e8a"
+    },
+    {
+      "id": 19,
+      "key": "Lee2025",
+      "aliases": [
+        "anion localization",
+        "cage center"
+      ],
+      "first_author": "Hyun-Jae Lee",
+      "title": "Lithium Localization by Anions in Argyrodite Solid Electrolytes from Machine-Learning-based Simulations",
+      "venue": "Advanced Energy Materials",
+      "year": "2025",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1002/aenm.202402396"
+    },
+    {
+      "id": 20,
+      "key": "Shantsila2026",
+      "aliases": [
+        "STING"
+      ],
+      "first_author": "Roman Shantsila",
+      "title": "STING, guided active learning for Machine Learned Interatomic Potentials examined on Lithium Thiophosphate solid state electrolytes",
+      "venue": "ChemRxiv",
+      "year": "2026",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.26434/chemrxiv.15001544/v1",
+      "doc_id": "f748de9ce818f09d94fbed27ff0f2a9f947e1aff50c66fe8907b404564e54c85"
+    },
+    {
+      "id": 21,
+      "key": "Nam2026",
+      "aliases": [],
+      "first_author": "Gunwook Nam",
+      "title": "Machine learning interatomic potentials for lithium battery electrolyte design",
+      "venue": "Bulletin of the Korean Chemical Society",
+      "year": "2026",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1002/bkcs.70105"
+    },
+    {
+      "id": 22,
+      "key": "Hong2026",
+      "aliases": [],
+      "first_author": "Xufeng Hong",
+      "title": "Deep active learning and knowledge transfer for rapid discovery of lithium metal battery electrolytes",
+      "venue": "Nature Communications",
+      "year": "2026",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1038/s41467-026-70973-4",
+      "doc_id": "d5e922e1a4c988fc49953209a4713ab7f81acf049f2e3097cf17362605288f4c"
+    },
+    {
+      "id": 23,
+      "key": "Diddens2022",
+      "aliases": [
+        "surrogate simulator",
+        "SEI modeling"
+      ],
+      "first_author": "Diddo Diddens",
+      "title": "Modeling the Solid Electrolyte Interphase: Machine Learning as a Game Changer?",
+      "venue": "Advanced Materials Interfaces",
+      "year": "2022",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1002/admi.202101734",
+      "doc_id": "53e5c9f6cb7c151948219af00a524f1562f75588139e6884d9ead1f53b88ba90"
+    },
+    {
+      "id": 24,
+      "key": "Zheng2025",
+      "aliases": [
+        "Si/Li6PS5Cl",
+        "SEI nucleation"
+      ],
+      "first_author": "Zhuoyuan Zheng",
+      "title": "Lithiation-dependent solid electrolyte interphase nucleation pathways in Si/Li6PS5Cl interfaces uncovered by machine learning-accelerated simulations",
+      "venue": "Energy Storage Materials",
+      "year": "2025",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1016/j.ensm.2025.104804"
+    },
+    {
+      "id": 25,
+      "key": "Zhong2025",
+      "aliases": [
+        "SEI conductivity",
+        "amorphous lithium fluorophosphate"
+      ],
+      "first_author": "Peichen Zhong",
+      "title": "Machine-Learning-Guided Insights into Solid-Electrolyte Interphase Conductivity: Are Amorphous Lithium Fluorophosphates",
+      "venue": "ACS Energy Letters",
+      "year": "2025",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1021/acsenergylett.5c03526"
+    },
+    {
+      "id": 26,
+      "key": "Stevenson2023",
+      "aliases": [
+        "MLFF",
+        "force field ranking"
+      ],
+      "first_author": "James Stevenson",
+      "title": "Machine learning force field ranking of candidate solid electrolyte interphase structures in Li-ion batteries",
+      "venue": "ChemRxiv",
+      "year": "2023",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.26434/chemrxiv-2023-gwnl8",
+      "doc_id": "3fbf310a442a666a645cf7108c2dcbd3e61f64a856365d87e244d69736fd8a7e"
+    },
+    {
+      "id": 27,
+      "key": "Jia2024",
+      "aliases": [],
+      "first_author": "Linan Jia",
+      "title": "Li–Solid Electrolyte Interfaces/Interphases in All-Solid-State Li Batteries",
+      "venue": "Electrochemical Energy Reviews",
+      "year": "2024",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1007/s41918-024-00212-1"
+    },
+    {
+      "id": 28,
+      "key": "Zhao2021",
+      "aliases": [
+        "CubicGAN",
+        "OQMD"
+      ],
+      "first_author": "Yong Zhao",
+      "title": "High-Throughput Discovery of Novel Cubic Crystal Materials Using Deep Generative Neural Networks",
+      "venue": "Advanced Science",
+      "year": "2021",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.1002/advs.202100566",
+      "doc_id": "3bf12fc9c2b8d07faa8ae0ca46f6bc63c85c98c29e6146246db90a5e2831625f"
+    },
+    {
+      "id": 29,
+      "key": "Liu2021",
+      "aliases": [
+        "screening review"
+      ],
+      "first_author": "Hongcan Liu",
+      "title": "Recent Advances in Screening Lithium Solid-State Electrolytes Through Machine Learning",
+      "venue": "Frontiers in Energy Research",
+      "year": "2021",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.3389/fenrg.2021.639741",
+      "doc_id": "8c43d54ac64dad916828b08d00c8a7f14a37392fd266832a9ff6ade4218302ee"
+    },
+    {
+      "id": 30,
+      "key": "Hu2023",
+      "aliases": [],
+      "first_author": "Shengyi Hu",
+      "title": "Machine-Learning Approaches for the Discovery of Electrolyte Materials for Solid-State Lithium Batteries",
+      "venue": "Batteries",
+      "year": "2023",
+      "verify_status": "VERIFIED",
+      "note": "sciverse 存在性已确认",
+      "unique_id": "paper:10.3390/batteries9040228",
+      "doc_id": "26ffe02b1cb73a18d324e4dc60e3a6ec71d5a36450eb9b1fe405d6633e2a98ae"
+    }
+  ]
+}
