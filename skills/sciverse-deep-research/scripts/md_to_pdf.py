@@ -7,10 +7,9 @@
 （MD 始终是唯一事实源，PDF/Word 只是排版视图，不回写正文）。
 
 渲染策略（分层，自动回退）：
-  1. 预处理 normalize()：把遗留正文里的 ASCII 直引号 "…" 规范成 “…”（弯引号），
-     并把纯文本数学（d_s、t^(−d_s/2)、Δ_ij、d̃ 等）焊接成真正的 $...$ TeX 数学。
+  1. 预处理 normalize()：把纯文本数学（d_s、t^(−d_s/2)、Δ_ij、d̃ 等）焊接成真正的 $...$ TeX 数学。
+     不再转换引号：Markdown 交付视图统一保留 ASCII 直引号 `"..."`，PDF 排版视图若需弯引号由 Pandoc `+smart` 在渲染侧处理。
      —— 这一层对 Pandoc 路径与手写回退路径都生效，是"上下标正确"的关键。
-     （SKILL 纪律已要求新稿直接用 $...$ 与 “…”；本层负责修复违反纪律的遗留稿。）
   2. 优先 Pandoc（若有 pandoc 可执行文件）：
        - PDF:  pandoc -f markdown+smart → xelatex PDF（smart 自动弯引号 + CJK 字体）
        - Word: pandoc -f markdown+smart → .docx
@@ -302,10 +301,9 @@ def smart_quotes(text):
 
 
 def normalize(text):
-    """完整预处理：先弯引号，再焊数学。顺序关键——弯引号产生 “”，
-    之后 mathify 的 BASE 前瞻会把“”当分隔符，不误并数学。"""
-    from_text = smart_quotes(text)
-    return mathify(from_text)
+    """完整预处理：保留 ASCII 直引号，仅对纯文本数学做焊接。
+    弯引号不再在 Markdown 预处理阶段生成，避免与格式硬条款 7（统一直引号）冲突。"""
+    return mathify(text)
 
 
 # =====================================================================

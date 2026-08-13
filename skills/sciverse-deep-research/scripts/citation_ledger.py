@@ -273,9 +273,9 @@ def format_entry_style(e, style):
     if style == "ieee":
         names = _ieee_names(e.get("authors") or e.get("first_author"))
         auth = ", ".join(names) if names else str(e.get("first_author", "")).strip()
-        # IEEE: [N] A. B., “Title,” Venue, vol, no, pp, year.
+        # IEEE: [N] A. B., "Title," Venue, vol, no, pp, year.
         loc = ", ".join(x for x in (_fmt_vol_issue_pages(e), year) if x)
-        out = f"[{e['id']}] {auth}, “{title},” {venue}"
+        out = f"[{e['id']}] {auth}, \"{title},\" {venue}"
         if loc:
             out += ", " + loc
         out += "."
@@ -330,8 +330,8 @@ def format_entry_style(e, style):
 
 
 def format_entry(e, style=None):
-    """打印一条。style=None 时为 skill 默认格式（向后兼容，逐字节不变）：
-    [N] 作者, “标题,” 会议/期刊, 年份.  非 VERIFIED/MINOR 自动附（未核验）。
+    """打印一条。style=None 时为 skill 默认格式：
+    [N] 作者, "标题," 会议/期刊, 年份.  非 VERIFIED/MINOR 自动附（未核验）。
     style in {apa, ieee, gbt7714, bibtex} 时按对应风格渲染。"""
     if style:
         return format_entry_style(e, style)
@@ -340,8 +340,8 @@ def format_entry(e, style=None):
     tail = ", ".join(p for p in (str(e.get("venue", "")).strip(), str(e.get("year", "")).strip()) if p)
     mark = _unverified_mark(e)
     if tail:
-        return f"[{e['id']}] {authors}, “{title},” {tail}.{mark}"
-    return f"[{e['id']}] {authors}, “{title}.”{mark}"
+        return f"[{e['id']}] {authors}, \"{title},\" {tail}.{mark}"
+    return f"[{e['id']}] {authors}, \"{title}.\"{mark}"
 
 
 # ---------------- validate ----------------

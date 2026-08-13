@@ -40,6 +40,7 @@ check_report.py — 交付前机械门禁（必跑；FAIL 未消解不得交付�
   python3 scripts/check_report.py 报告.md --citation-ledger .workflow/citation_ledger.json
   python3 scripts/check_report.py 报告.md --terms terms.json      # 覆盖非标准术语小词表
   python3 scripts/check_report.py 报告.md --export-clean 交付.md  # 交付默认出数学干净 md
+  python3 scripts/check_report.py 报告.md --strict-format        # 格式硬条款违反升 FAIL
   python3 scripts/check_report.py --selftest
 
 解析原则：宽容读取——解析不到的项打 INFO 跳过，不猜、不硬报错；
@@ -688,6 +689,308 @@ def check_process_artifacts(f, workflow_dir, strict=False):
             f.add(level, "过程工件", f".workflow/{fname} 缺少 ✅/⚠️/❌ 状态标记——压缩块格式不合规")
 
 
+# ---------------- 格式硬条款检查（output-structure.md 格式轮） ----------------
+
+CN_NUM = {
+    '一': 1, '二': 2, '三': 3, '四': 4, '五': 5,
+    '六': 6, '七': 7, '八': 8, '九': 9, '十': 10,
+    '十一': 11, '十二': 12, '十三': 13, '十四': 14, '十五': 15,
+}
+
+SECTION_ORDER = [
+    ('摘要', False),
+    ('关键引用', False),
+    ('核心要点', False),
+]
+
+
+def _parse_cn_number(s):
+    """把中文数字串（一到十五）转成 int；解析失败返回 None。"""
+    s = s.strip()
+    if not s:
+        return None
+    # 先尝试完整匹配（十一、十二…）
+    if s in CN_NUM:
+        return CN_NUM[s]
+    # 简单组合：十X / X
+    if s.startswith('十'):
+        tail = s[1:]
+        if not tail:
+            return 10
+        t = CN_NUM.get(tail)
+        if t is not None:
+            return 10 + t
+    return None
+
+
+def _top_level_sections(text):
+    """返回 (行号, 标题文本, 是否编号, 编号值) 的列表。只认独立的 ## 行。"""
+    secs = []
+    for no, line in iter_lines_with_no(text):
+        m = re.match(r'^##\s+(.+)$', line.strip())
+        if not m:
+            continue
+        title = m.group(1).strip()
+        # 编号节：标题以"N、"开头
+        nm = re.match(r'^([一二三四五六七八九十]+)[、.\s]\s*(.*)$', title)
+        if nm:
+            num = _parse_cn_number(nm.group(1))
+            secs.append((no, title, True, num))
+        else:
+            secs.append((no, title, False, None))
+    return secs
+
+
+def check_section_order_and_numbering(f, text, level="WARN"):
+    """检查顶层章节顺序与编号连续性。"""
+    secs = _top_level_sections(text)
+    if not secs:
+        f.add(level, "格式-章节顺序", "未检测到任何 ## 顶层章节")
+        return
+
+    # 顺序检查：必须依次出现 摘要、关键引用、核心要点
+    titles_lower = [(s[1].replace(' ', '').replace('　', ''), s[0]) for s in secs]
+    expected_prefixes = ['摘要', '关键引用', '核心要点']
+    # 找每个期望节第一次出现的位置
+    positions = {}
+    for prefix in expected_prefixes:
+        for title, no in titles_lower:
+            if title.startswith(prefix):
+                positions[prefix] = no
+                break
+    # 摘要 必须在 关键引用 之前，关键引用 必须在 核心要点 之前
+    if '摘要' in positions and '关键引用' in positions:
+        if positions['摘要'] < positions['关键引用']:
+            f.add(level, "格式-章节顺序",
+                  f"L{positions['摘要']} `## 摘要` 出现在 L{positions['关键引用']} `## 关键引用` 之前——冻结顺序应为：关键引用 → 摘要 → 核心要点")
+    if '关键引用' in positions and '核心要点' in positions:
+        if positions['关键引用'] > positions['核心要点']:
+            f.add(level, "格式-章节顺序",
+                  f"L{positions['关键引用']} `## 关键引用` 出现在 L{positions['核心要点']} `## 核心要点` 之后——冻结顺序应为：关键引用 → 摘要 → 核心要点")
+
+    # 编号连续性检查
+    numbered = [(no, title, num) for no, title, is_num, num in secs if is_num]
+    if not numbered:
+        f.add(level, "格式-章节编号", "未检测到编号主体章节（## 一、...）")
+        return
+
+    # 第一个编号节必须是一
+    first_no, first_title, first_num = numbered[0]
+    if first_num != 1:
+        f.add(level, "格式-章节编号",
+              f"L{first_no} 第一个编号章节为 `{first_title}`，编号不是`一`——主体章节必须从`## 一、引言`开始")
+
+    # 编号必须连续
+    nums = [num for _, _, num in numbered]
+    for i in range(1, len(nums)):
+        if nums[i] != nums[i - 1] + 1:
+            prev_no, prev_title, _ = numbered[i - 1]
+            cur_no, cur_title, _ = numbered[i]
+            f.add(level, "格式-章节编号",
+                  f"L{cur_no} `{cur_title}` 与上一编号章节 L{prev_no} `{prev_title}` 不连续——主体章节编号必须 一、二、三… 连续递增")
+
+    # 编号节之后必须出现 ## 参考文献
+    has_refs = any(title.replace(' ', '') in ('参考文献', 'References') for _, title, _, _ in secs if not _)
+    # 简化：只看最后一个非编号节是否为参考文献
+    non_numbered_titles = [title for _, title, is_num, _ in secs if not is_num]
+    if non_numbered_titles and non_numbered_titles[-1].replace(' ', '') not in ('参考文献', 'References'):
+        f.add(level, "格式-章节顺序", "顶层章节末项不是 `## 参考文献`")
+
+
+def check_key_references_format(f, text, level="WARN"):
+    """关键引用节：每条必须 `- [N] 作者, 年份, "英文短标题"`。"""
+    lines = text.split("\n")
+    in_key = False
+    for no, line in enumerate(lines, 1):
+        if re.match(r'^##\s+关键引用', line.strip()):
+            in_key = True
+            continue
+        if in_key and re.match(r'^##\s+', line.strip()):
+            break
+        if not in_key:
+            continue
+        s = line.strip()
+        if not s:
+            continue
+        if not s.startswith('- ['):
+            continue
+        # 必须匹配：- [N] 作者, 年份, "..."
+        if not re.search(r'\d{4}', s):
+            f.add(level, "格式-关键引用",
+                  f"L{no} 关键引用缺少年份：{s[:80]}——格式应为 `- [N] 第一作者, 年份, \"标题\"`")
+        if not re.search(r'"[^"]+"', s):
+            f.add(level, "格式-关键引用",
+                  f"L{no} 关键引用缺少英文引号标题：{s[:80]}——格式应为 `- [N] 第一作者, 年份, \"标题\"`")
+
+
+def check_bold_labels_as_headings(f, text, level="WARN"):
+    """禁止用行内加粗标签代替子标题：行首 `**标签：** 内容` 或 `**标签。** 内容`。"""
+    # 豁免：列表项 `- **关键词**：`（开放问题列表允许）
+    pat = re.compile(r'^(?!\s*[-*•]\s+\*\*)\s*\*\*[^*]+\*\*\s*[：:。]\s*')
+    for no, line in iter_lines_with_no(text):
+        if pat.match(line):
+            f.add(level, "格式-子标题",
+                  f"L{no} 疑似用行内加粗标签代替子标题：{line.strip()[:80]}——应改为 `### 子标题`")
+
+
+def check_table_captions_and_columns(f, text, level="WARN"):
+    """表格上方必须有 caption，同表列数一致。"""
+    lines = text.split("\n")
+    i = 0
+    while i < len(lines):
+        if '|' in lines[i] and not lines[i].strip().startswith('```'):
+            start = i
+            pipe_counts = []
+            while i < len(lines) and '|' in lines[i]:
+                pipe_counts.append(lines[i].count('|'))
+                i += 1
+            end = i
+            if len(pipe_counts) >= 2:
+                # 检查列数一致
+                if len(set(pipe_counts)) > 1:
+                    f.add(level, "格式-表格",
+                          f"L{start+1}-L{end} 表格每行 `|` 数量不一致：{pipe_counts}——表头、分隔线、数据行列数必须相同")
+                # 检查上方是否有 caption（非空且不是表格/分隔线）
+                caption_found = False
+                for j in range(start - 1, max(-1, start - 4), -1):
+                    if j < 0:
+                        break
+                    s = lines[j].strip()
+                    if not s:
+                        continue
+                    if '|' in s or s.startswith('---'):
+                        break
+                    if re.match(r'^(表\s*\d*[：:.]\s*|Table\s*\d*[：:.]\s*)', s):
+                        caption_found = True
+                        break
+                if not caption_found:
+                    f.add(level, "格式-表格",
+                          f"L{start+1}-L{end} 表格上方缺少 caption——应在表格前加一行 `表 N：结论性表题`")
+        else:
+            i += 1
+
+
+# 常见化学元素符号（用于启发式检测化学式误入数学模式）
+CHEM_ELEMENTS = {
+    'H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne',
+    'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'K', 'Ca', 'Sc',
+    'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga',
+    'Ge', 'As', 'Se', 'Br', 'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb',
+    'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd', 'In', 'Sn', 'Sb',
+    'Te', 'I', 'Xe', 'Cs', 'Ba', 'La', 'Ce', 'Pr', 'Nd', 'Pm',
+    'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb', 'Lu',
+    'Hf', 'Ta', 'W', 'Re', 'Os', 'Ir', 'Pt', 'Au', 'Hg', 'Tl',
+    'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra', 'Ac', 'Th', 'Pa',
+    'U', 'Np', 'Pu',
+}
+
+
+def _looks_like_chemistry(math_text):
+    """启发式：数学块内是否像化学式。
+
+    策略：把数学块按元素符号切分（大写字母 + 可选小写字母），统计出现的化学元素。
+    为降低物理/数学记号误报（H=Hamiltonian、N=系统尺寸、O/P/S 等单字母符号），
+    要求至少出现一个多字母元素符号（Li/Na/Mg/...），且满足以下任一条件：
+    - 两个以上不同元素符号；
+    - 任一元素符号后紧跟数字（无下划线），如 Li3、S3。
+    这样 $Li_3BiS_3$ 会切出 Li/Bi/S（含多元素 Li）触发；$P_0(t)$ 只切出 P（单元素无紧跟数字）不误报；
+    $H_{FO}$ / $H \sim N^{...}$ 因无多字母元素而不触发。
+    """
+    # 切分：每个元素符号 = 大写 + 可选小写
+    tokens = re.findall(r'[A-Z][a-z]?', math_text)
+    found_elements = set()
+    for tok in tokens:
+        if tok in CHEM_ELEMENTS:
+            found_elements.add(tok)
+    if not found_elements:
+        return False
+    # 必须有至少一个多字母元素符号，否则 H/C/N/O/P/S 等单字母物理符号易误报
+    multi_letter_elements = {e for e in found_elements if len(e) >= 2}
+    if not multi_letter_elements:
+        return False
+    # 规则 1：任一元素符号后紧跟数字（如 Li3、S3）
+    has_el_digit = bool(re.search(r'(?:' + '|'.join(re.escape(e) for e in CHEM_ELEMENTS) + r')\d', math_text))
+    # 规则 2：两个以上不同元素符号
+    multi_el = len(found_elements) >= 2
+    return has_el_digit or multi_el
+
+
+def check_chemistry_in_math(f, text, level="WARN"):
+    """化学式/材料名禁止放入 $...$ 数学模式。"""
+    in_code = False
+    for no, line in iter_lines_with_no(text):
+        if line.strip().startswith("```"):
+            in_code = not in_code
+            continue
+        if in_code:
+            continue
+        for m in re.finditer(r'(?<!\\)\$([^$\n]+)\$', line):
+            math_text = m.group(1)
+            if _looks_like_chemistry(math_text):
+                f.add(level, "格式-化学式",
+                      f"L{no} 化学式/材料名疑似误入数学模式 `${math_text}$`——应改为 plain text 或 Unicode 下标，不用 `$...$")
+
+
+def check_research_cost_fields(f, text, level="WARN"):
+    """调研成本节必须含六字段关键字。节标题可能被编号（如 ## 八、调研成本）。"""
+    lines = text.split("\n")
+    in_cost = False
+    cost_lines = []
+    cost_start = None
+    for no, line in enumerate(lines, 1):
+        if re.match(r'^##\s+.*调研成本', line.strip()):
+            in_cost = True
+            cost_start = no
+            continue
+        if in_cost and re.match(r'^##\s+', line.strip()):
+            break
+        if in_cost:
+            cost_lines.append((no, line))
+    if not cost_lines or cost_start is None:
+        return
+    joined = "\n".join(l for _, l in cost_lines)
+    required = [
+        ("总检索调用次数", ["总检索调用次数", "检索调用"]),
+        ("入选并纳入台账的文献数", ["入选", "文献数"]),
+        ("核验通过率", ["核验通过率", "核验"]),
+        ("检索轮次 / 滚雪球轮次", ["检索轮次", "滚雪球轮次", "滚雪球"]),
+        ("wall-clock 用时", ["wall-clock", "用时", "耗时"]),
+        ("估计总 token 数", ["估计总 token 数", "token 数", "总 token"]),
+    ]
+    for label, keys in required:
+        if not any(k in joined for k in keys):
+            f.add(level, "格式-调研成本",
+                  f"L{cost_start} `## 调研成本` 缺少字段 `{label}`——必须按 output-structure.md 六字段结构化列出")
+
+
+def check_curly_quotes(f, text, level="WARN"):
+    """参考文献与正文标题统一用直引号，禁用弯引号。"""
+    for no, line in iter_lines_with_no(text):
+        if '“' in line or '”' in line:
+            f.add(level, "格式-引号",
+                  f"L{no} 出现弯引号——请统一为 ASCII 直引号 `\"...\"`：{line.strip()[:80]}")
+
+
+def check_null_bytes(f, raw_bytes, level="FAIL"):
+    """交付文件不得含 null 字节。"""
+    null_count = raw_bytes.count(b'\x00')
+    if null_count:
+        positions = [i for i, b in enumerate(raw_bytes) if b == 0][:5]
+        f.add(level, "格式-null字节",
+              f"文件含 {null_count} 处 null 字节（offsets {positions}）——交付文件损坏，需重跑 compile 或修复编码")
+
+
+def check_format(f, text, level="WARN"):
+    """格式硬条款统一入口。"""
+    check_section_order_and_numbering(f, text, level=level)
+    check_key_references_format(f, text, level=level)
+    check_bold_labels_as_headings(f, text, level=level)
+    check_table_captions_and_columns(f, text, level=level)
+    check_chemistry_in_math(f, text, level=level)
+    check_research_cost_fields(f, text, level=level)
+    check_curly_quotes(f, text, level=level)
+
+
 def _ledger_from_data(data):
     """把台账 JSON 转成 {id: entry}；返回 (dict, failures)。
     门禁侧健壮加载（红队 C3/A5/A6）：坏台账必须产出诊断 FAIL 并挡下交付——
@@ -720,7 +1023,7 @@ def _ledger_from_data(data):
 # ---------------- driver ----------------
 
 def run_checks(report_text, ledger_extra="", mode="auto", citation_ledger=None, terms=None,
-             workflow_dir=None, process_strict=False):
+             workflow_dir=None, process_strict=False, format_strict=False):
     f = Findings()
     embedded = LEDGER_MARK in report_text
     if mode == "auto":
@@ -745,6 +1048,9 @@ def run_checks(report_text, ledger_extra="", mode="auto", citation_ledger=None, 
     if mode == "strict":
         check_statements(f, report_text, ledger_text, refs)
     check_process_artifacts(f, workflow_dir, strict=process_strict)
+    # 格式硬条款（格式轮新增）：默认 WARN，--strict-format 升 FAIL
+    fmt_level = "FAIL" if format_strict else "WARN"
+    check_format(f, report_text, level=fmt_level)
     return mode, f
 
 
@@ -758,6 +1064,8 @@ def main(argv=None):
     ap.add_argument("--export-clean", help="交付默认出数学干净 md（normalize 后）的输出路径；final.md 仍是事实源")
     ap.add_argument("--strict-process", action="store_true",
                     help="过程工件（section_reviews.md / evidence_compress.md）缺失/为空时升 FAIL（默认 WARN）")
+    ap.add_argument("--strict-format", action="store_true",
+                    help="格式硬条款（output-structure.md 格式轮）违反时升 FAIL（默认 WARN）")
     ap.add_argument("--selftest", action="store_true")
     args = ap.parse_args(argv)
 
@@ -765,7 +1073,15 @@ def main(argv=None):
         return selftest()
     if not args.report:
         ap.error("缺少报告文件（或用 --selftest）")
-    text = io.open(args.report, encoding="utf-8").read()
+    raw = io.open(args.report, "rb").read()
+    text = raw.decode("utf-8")
+    # 零依赖前置检查：null 字节会污染交付文件，直接 FAIL
+    f_null = Findings()
+    check_null_bytes(f_null, raw, level="FAIL")
+    if f_null.count("FAIL"):
+        print("== check_report ==  mode: n/a")
+        print(f_null.render())
+        return 1
     terms = None
     if args.terms:
         try:
@@ -794,7 +1110,8 @@ def main(argv=None):
             return 1
     workflow_dir = infer_workflow_dir(args.report)
     mode, f = run_checks(text, extra, args.mode, cledger, terms,
-                         workflow_dir=workflow_dir, process_strict=args.strict_process)
+                         workflow_dir=workflow_dir, process_strict=args.strict_process,
+                         format_strict=args.strict_format)
     print(f"== check_report ==  mode: {mode}")
     print(f.render())
     if args.export_clean:

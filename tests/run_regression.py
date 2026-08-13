@@ -97,9 +97,9 @@ def _delivery_gate():
         "--citation-ledger",
         "examples/dft-kL-demo/.workflow/citation_ledger.json.delivery.json")
     # 旧 demo 无 section_reviews.md / evidence_compress.md，默认产生过程工件 WARN；
-    # 只要 FAIL 0 且非过程工件项无 WARN 即算通过。
+    # 格式硬条款为新增闸口，旧 demo 亦可能产生格式 WARN。只要 FAIL 0 且非过程/格式项无 WARN 即算通过。
     non_process_warns = [line for line in out.splitlines()
-                         if line.startswith("[WARN]") and "过程工件" not in line]
+                         if line.startswith("[WARN]") and "过程工件" not in line and "格式-" not in line]
     ok = code == 0 and "FAIL 0" in out and len(non_process_warns) == 0
     return ok, last_line(out)
 
@@ -161,7 +161,7 @@ def _sc_delivery_gate():
         # clean clone 里不存在，门禁必须引用入仓的 output/引用台账_delivery.json）
         "examples/space-compute-demo/output/引用台账_delivery.json")
     non_process_warns = [line for line in out.splitlines()
-                         if line.startswith("[WARN]") and "过程工件" not in line]
+                         if line.startswith("[WARN]") and "过程工件" not in line and "格式-" not in line]
     ok = code == 0 and "FAIL 0" in out and len(non_process_warns) == 0
     return ok, last_line(out)
 
@@ -219,9 +219,10 @@ def _phasea_budget_over():
 
 
 # md_to_pdf 的 normalize/mathify 是纯文本变换（不触发 LaTeX/Pandoc），
-# 可确定性离线断言：ASCII 直引号归零、裸 `x_i` 焊接成 `$x_{i}$` 数学、
-# smartquote 不误伤已归档的 $...$ 数学块。这是 M3 渲染修复的根因回归。
-@check("md_to_pdf normalize 直引号归零 + 裸公式数学化")
+# 可确定性离线断言：ASCII 直引号保留、裸 `x_i` 焊接成 `$x_{i}$` 数学、
+# 已归档的 $...$ 数学块不被误伤。这是 M3 渲染修复的根因回归，也是格式轮
+# 硬条款 7（统一直引号）的程序级保障。
+@check("md_to_pdf normalize 直引号保留 + 裸公式数学化")
 def _md_normalize():
     import importlib.util
     spec = importlib.util.spec_from_file_location(
@@ -230,7 +231,8 @@ def _md_normalize():
     spec.loader.exec_module(m)
     cases = [
         # (输入, 必须含, 必须不含)
-        (u'他说"这是关键"', u'“这是关键”', u'"'),
+        (u'他说"这是关键"', u'"这是关键"', u'“'),
+        (u'[1] Author, "Title," Venue, 2020.', u'"Title,"', u'“'),
         (u'公式 x_i 与 t^(−d_s/2) 相关', u'$x_{i}$', None),
         (u'已有 $\\kappa$ 数学块保留', u'$\\kappa$', None),
     ]
@@ -243,7 +245,7 @@ def _md_normalize():
             fails.append(f"{src!r} -> 意外含 {must_not!r}: {out!r}")
     if fails:
         return False, "; ".join(fails)
-    # 抓一个真实遗留稿做基准：230 个直引号应全部归零（若不存在该稿则跳过，不断言）
+    # 抓一个真实遗留稿做基准：ASCII 直引号数量应不变（若不存在该稿则跳过，不断言）
     demo = os.path.join(
         ROOT, "examples", "spectral-dimension-survey",
         "谱维数与拉普拉斯谱_随机行走综述.md")
@@ -251,11 +253,11 @@ def _md_normalize():
         raw = open(demo, encoding="utf-8").read()
         n_raw = raw.count('"')
         n_norm = m.normalize(raw).count('"')
-        if n_raw and n_norm != 0:
-            fails.append(f"遗留稿直引号 {n_raw} -> normalized 后仍剩 {n_norm}")
+        if n_raw and n_norm != n_raw:
+            fails.append(f"遗留稿直引号 {n_raw} -> normalized 后变为 {n_norm}（应保留）")
     if fails:
         return False, "; ".join(fails)
-    return True, "直引号归零 + 数学化 OK"
+    return True, "直引号保留 + 数学化 OK"
 
 
 # M3 收尾回归：审查员审计提的潜伏缺陷——混排弯引号锚点方向、连写下标+上标不焊。
@@ -275,13 +277,13 @@ def _md_normalize_edge():
         if got != want:
             fails.append(f"{name}: {src!r} -> {got!r}, 期望 {want!r}")
 
-    # ① 混排弯引号锚点方向（ASCII 对方向不再反）+ 多对交替 + 代码内引号保护
-    eq("混排弯引号锚点", u'“A” then "B"', u'“A” then “B”')
-    eq("交替两对", u'"甲" 与 "乙"', u'“甲” 与 “乙”')
-    # 代码跨度内的 " 不参与配对（保护段原样保留）
-    eq("代码内引号保护", u'`print("a")` 前后 "x"', u'`print("a")` 前后 “x”')
-    # 裸 ASCII 单对归零
-    eq("裸一对归零", u'他说"关键"', u'他说“关键”')
+    # ① 混排弯引号保持原样、ASCII 直引号保持原样 + 代码内引号保护
+    eq("混排弯引号锚点", u'“A” then "B"', u'“A” then "B"')
+    eq("交替两对", u'"甲" 与 "乙"', u'"甲" 与 "乙"')
+    # 代码跨度内的 " 被保护，原样保留
+    eq("代码内引号保护", u'`print("a")` 前后 "x"', u'`print("a")` 前后 "x"')
+    # 裸 ASCII 单对保留
+    eq("裸一对保留", u'他说"关键"', u'他说"关键"')
 
     # ② 裸公式焊接：连写下标+上标并入同一数学块；花括号形态保持
     eq("连写下标+上标", u'a_1^2', u'$a_{1}^{2}$')
@@ -305,7 +307,7 @@ def _md_normalize_edge():
 
     if fails:
         return False, "; ".join(fails)
-    return True, "edge 全过（引号锚点/连写脚本/归档保护/幂等）"
+    return True, "edge 全过（直引号保留/连写脚本/归档保护/幂等）"
 
 
 
@@ -399,10 +401,10 @@ def _p2_render(style):
 @check("P2 默认无 --style = 现有格式（逐字节向后兼容）")
 def _p2_default_backcompat():
     code, out = _p2_render(None)
-    expect = ("[1] Ullah Z, Khan R, “High-temperature thermoelectric,” "
-              "Computational Materials Science, 2025.\n"
-              "[2] Broido DA, Malorny M, “Intrinsic lattice thermal "
-              "conductivity,” Applied Physics Letters, 2007.（未核验）")
+    expect = ('[1] Ullah Z, Khan R, "High-temperature thermoelectric," '
+              'Computational Materials Science, 2025.\n'
+              '[2] Broido DA, Malorny M, "Intrinsic lattice thermal '
+              'conductivity," Applied Physics Letters, 2007.（未核验）')
     return code == 0 and out.strip() == expect, last_line(out)
 
 
@@ -475,6 +477,142 @@ def _compile_idempotent():
         has_numcite = re.search(r"\[\d+\]", compiled) is not None
         return (not leftover_keys) and has_numcite, \
             f"残留键={leftover_keys} 数字引用={has_numcite}"
+
+
+def _minimal_compliant_report(extra_body="", bad_key_ref=None, bad_cost=None, bad_refs=None):
+    """生成一份除目标问题外尽量合规的测试报告；测试只关心自己的目标格式项。"""
+    key_ref = bad_key_ref if bad_key_ref is not None else '- [1] A, 2020, "T"'
+    cost = bad_cost if bad_cost is not None else '''- 总检索调用次数：1
+- 入选并纳入台账的文献数：1
+- 核验通过率：1/1
+- 检索轮次 / 滚雪球轮次：1/0
+- wall-clock 用时：1m
+- 估计总 token 数：1'''
+    refs = bad_refs if bad_refs is not None else '[1] A, "T," V, 2020.'
+    return f"""# 标题
+## 关键引用
+{key_ref}
+## 摘要
+摘要 [1]。
+## 核心要点
+- 要点 1
+## 一、引言
+## 二、研究方法
+滚雪球 1 轮，末轮新增 0 篇，达检索饱和。
+## 三、分类框架
+## 四、分支
+{extra_body}
+### 小结
+内容 [1]。
+## 五、综合讨论
+## 六、开放问题
+## 七、结论
+## 八、调研成本
+{cost}
+## 参考文献
+{refs}
+"""
+
+
+@check("check_report 格式闸口：章节顺序错误默认 WARN")
+def _format_section_order_warn():
+    with tempfile.TemporaryDirectory() as td:
+        report = os.path.join(td, "final.md")
+        # 错误：摘要 在 关键引用 之前；且主体章节从 二 开始
+        with open(report, "w", encoding="utf-8") as f:
+            f.write("# 标题\n## 摘要\n摘要 [1]。\n## 关键引用\n- [1] A, 2020, \"T\"\n## 核心要点\n## 二、研究方法\n滚雪球 1 轮，末轮新增 0 篇，达检索饱和。\n## 参考文献\n[1] A, \"T,\" V, 2020.\n")
+        code, out = run_script("check_report.py", report, "--mode", "survey")
+        return code == 0 and "格式-章节顺序" in out, last_line(out)
+
+
+@check("check_report 格式闸口：--strict-format 章节错误升 FAIL")
+def _format_section_order_strict_fail():
+    with tempfile.TemporaryDirectory() as td:
+        report = os.path.join(td, "final.md")
+        with open(report, "w", encoding="utf-8") as f:
+            f.write("# 标题\n## 摘要\n摘要 [1]。\n## 关键引用\n- [1] A, 2020, \"T\"\n## 核心要点\n## 二、研究方法\n滚雪球 1 轮，末轮新增 0 篇，达检索饱和。\n## 参考文献\n[1] A, \"T,\" V, 2020.\n")
+        code, out = run_script("check_report.py", report, "--mode", "survey", "--strict-format")
+        return code == 1 and "格式-章节顺序" in out, last_line(out)
+
+
+@check("check_report 格式闸口：关键引用缺作者年份标题")
+def _format_key_refs_bad():
+    with tempfile.TemporaryDirectory() as td:
+        report = os.path.join(td, "final.md")
+        with open(report, "w", encoding="utf-8") as f:
+            f.write(_minimal_compliant_report(bad_key_ref='- [1] 层次筛选 2 万余种材料'))
+        code, out = run_script("check_report.py", report, "--mode", "survey")
+        return code == 0 and "格式-关键引用" in out, last_line(out)
+
+
+@check("check_report 格式闸口：行内加粗标签代替子标题")
+def _format_bold_label_heading():
+    with tempfile.TemporaryDirectory() as td:
+        report = os.path.join(td, "final.md")
+        with open(report, "w", encoding="utf-8") as f:
+            f.write(_minimal_compliant_report(extra_body='**裁决**：这是结论。'))
+        code, out = run_script("check_report.py", report, "--mode", "survey")
+        return code == 0 and "格式-子标题" in out, last_line(out)
+
+
+@check("check_report 格式闸口：表格缺 caption")
+def _format_table_no_caption():
+    with tempfile.TemporaryDirectory() as td:
+        report = os.path.join(td, "final.md")
+        with open(report, "w", encoding="utf-8") as f:
+            f.write(_minimal_compliant_report(extra_body='| a | b |\n|---|---|\n| 1 | 2 |'))
+        code, out = run_script("check_report.py", report, "--mode", "survey")
+        return code == 0 and "格式-表格" in out, last_line(out)
+
+
+@check("check_report 格式闸口：化学式误入数学模式")
+def _format_chemistry_in_math():
+    with tempfile.TemporaryDirectory() as td:
+        report = os.path.join(td, "final.md")
+        with open(report, "w", encoding="utf-8") as f:
+            f.write(_minimal_compliant_report(extra_body='锁定 $Li_3BiS_3$ 候选 [1]。'))
+        code, out = run_script("check_report.py", report, "--mode", "survey")
+        return code == 0 and "格式-化学式" in out, last_line(out)
+
+
+@check("check_report 格式闸口：调研成本缺字段")
+def _format_research_cost_missing():
+    with tempfile.TemporaryDirectory() as td:
+        report = os.path.join(td, "final.md")
+        with open(report, "w", encoding="utf-8") as f:
+            f.write(_minimal_compliant_report(bad_cost='这是成本小节的内容。'))
+        code, out = run_script("check_report.py", report, "--mode", "survey")
+        return code == 0 and "格式-调研成本" in out, last_line(out)
+
+
+@check("check_report 格式闸口：弯引号检测")
+def _format_curly_quotes():
+    with tempfile.TemporaryDirectory() as td:
+        report = os.path.join(td, "final.md")
+        with open(report, "w", encoding="utf-8") as f:
+            f.write(_minimal_compliant_report(bad_refs='[1] A, “T,” V, 2020.'))
+        code, out = run_script("check_report.py", report, "--mode", "survey")
+        return code == 0 and "格式-引号" in out, last_line(out)
+
+
+@check("check_report 格式闸口：null 字节 FAIL")
+def _format_null_bytes():
+    with tempfile.TemporaryDirectory() as td:
+        report = os.path.join(td, "final.md")
+        with open(report, "wb") as f:
+            f.write("# 标题\n".encode("utf-8") + b"\x00\n")
+        code, out = run_script("check_report.py", report, "--mode", "survey")
+        return code == 1 and "格式-null字节" in out, last_line(out)
+
+
+@check("check_report 格式闸口：完全合规通过")
+def _format_all_good():
+    with tempfile.TemporaryDirectory() as td:
+        report = os.path.join(td, "final.md")
+        with open(report, "w", encoding="utf-8") as f:
+            f.write(_minimal_compliant_report())
+        code, out = run_script("check_report.py", report, "--mode", "survey", "--strict-format")
+        return code == 0 and "FAIL 0" in out, last_line(out)
 
 
 # ---------- 慢速用例（--slow 才跑） ----------
